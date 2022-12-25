@@ -12,7 +12,7 @@ import {
 } from "@mui/material"
 import { Icon } from '@iconify/react'
 
-const drawerWidth = 240;
+const drawerWidth = 320;
 
 const openedMixin = (theme: Theme): CSSObject => ({
   width: drawerWidth,
