@@ -4,7 +4,7 @@ import useConnectWallet from '../hooks/useConnectWallet';
 import DashbaordLayout from '../layouts/DashbaordLayout';
 import LandingLayout from '../layouts/LandingLayout';
 import ConnectWallet from '../pages/ConnectWallet';
-import WaitingList from '../pages/WaitingList';
+import Dashboard from '../pages/Dashboard';
 
 export default function Routes() {
   const { connected } = useConnectWallet()
@@ -24,7 +24,7 @@ export default function Routes() {
       children: [
         {
           path: '/dashboard',
-          element: <WaitingList />
+          element: <Dashboard />
         }
       ]
     },

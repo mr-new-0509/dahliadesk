@@ -49,7 +49,8 @@ const reducer = (state: object, action: IAction) =>
 const ConnectWalletContext = createContext({
   ...initialState,
   connectAct: (network: TNetwork) => Promise.resolve(),
-  disconnectAct: () => Promise.resolve()
+  disconnectAct: () => Promise.resolve(),
+  switchNetworkAct: (network: TNetwork) => Promise.resolve()
 });
 
 //  Provider
@@ -78,12 +79,20 @@ function ConnectWalletProvider({ children }: IProps) {
     });
   };
 
+  const switchNetworkAct = (network: TNetwork) => {
+    dispatch({
+      type: 'SET_NETWORK',
+      payload: network
+    })
+  }
+
   return (
     <ConnectWalletContext.Provider
       value={{
         ...state,
         connectAct,
-        disconnectAct
+        disconnectAct,
+        switchNetworkAct
       }}
     >
       {children}
