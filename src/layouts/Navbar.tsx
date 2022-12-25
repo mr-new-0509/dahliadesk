@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import React, { useState } from "react";
 import {
   Box,
   CSSObject,
@@ -6,15 +6,11 @@ import {
   Drawer as MuiDrawer,
   IconButton,
   List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
   Stack,
   styled,
   Theme
 } from "@mui/material"
 import { Icon } from '@iconify/react'
-import { routesOfDashboard } from "../Routes/routes";
 
 const drawerWidth = 240;
 
@@ -88,10 +84,10 @@ export default function Navbar() {
 
         </Stack>
 
-        {/* <Divider />
+        <Divider />
 
         <List>
-          {routes.map(route => {
+          {/* {routes.map(route => {
             if (route.name && route.icon) {
               return (
                 <ListItemButton key={route.path}>
@@ -105,8 +101,8 @@ export default function Navbar() {
             return (
               <Fragment key={route.path} />
             )
-          })}
-        </List> */}
+          })} */}
+        </List>
       </Stack>
     </Drawer>
   )

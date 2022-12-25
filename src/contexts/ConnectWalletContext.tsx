@@ -1,8 +1,7 @@
 import { createContext, useReducer } from 'react';
+import { TNetwork } from '../utils/types';
 
 /* --------------------------------------------------------------- */
-
-type TNetwork = 'testnet' | 'mainnet'
 
 interface IInitialState {
   connected: boolean;
@@ -49,7 +48,7 @@ const reducer = (state: object, action: IAction) =>
 //  Context
 const ConnectWalletContext = createContext({
   ...initialState,
-  connectAct: () => Promise.resolve(),
+  connectAct: (network: TNetwork) => Promise.resolve(),
   disconnectAct: () => Promise.resolve()
 });
 
