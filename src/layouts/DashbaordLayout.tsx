@@ -4,7 +4,7 @@ import PageTitle from "../components/PageTitle"
 import ScrollFab from "../components/ScrollFab"
 import Navbar from "./Navbar"
 
-export default function MainLayout() {
+export default function DashboardLayout() {
   return (
     <Stack direction="row">
       <Navbar />

@@ -1,9 +1,10 @@
 import { Navigate } from "react-router-dom";
+import ConnectWallet from "../pages/ConnectWallet";
 import Orders from "../pages/Orders";
 import WaitingList from "../pages/WaitingList";
 import { IRoute } from "../utils/interfaces";
 
-export const routes: Array<IRoute> = [
+export const routesOfDashboard: Array<IRoute> = [
   {
     name: 'Waiting Lists',
     icon: 'fluent:document-bullet-list-clock-24-filled',
@@ -15,6 +16,17 @@ export const routes: Array<IRoute> = [
     icon: 'fluent:clipboard-task-list-ltr-24-filled',
     path: '/orders',
     element: <Orders />
+  },
+  {
+    path: '*',
+    element: <Navigate to="/" />
+  }
+]
+
+export const routesOfLanding: Array<IRoute> = [
+  {
+    path: '/connect-wallet',
+    element: <ConnectWallet />
   },
   {
     path: '*',

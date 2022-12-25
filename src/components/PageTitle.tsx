@@ -1,10 +1,10 @@
 import { Box, Typography } from "@mui/material"
 import { useMemo } from "react"
 import { useLocation } from "react-router-dom"
-import { routes } from "../Routes/routes"
+import { routesOfDashboard } from "../Routes/routes"
 
 const getPageName = (path: string): string | undefined => {
-  const routeData = routes.find(element => element.path === path)
+  const routeData = routesOfDashboard.find(element => element.path === path)
   return routeData?.name
 }
 

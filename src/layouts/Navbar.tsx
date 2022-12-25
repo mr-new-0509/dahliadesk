@@ -14,7 +14,7 @@ import {
   Theme
 } from "@mui/material"
 import { Icon } from '@iconify/react'
-import { routes } from "../Routes/routes";
+import { routesOfDashboard } from "../Routes/routes";
 
 const drawerWidth = 240;
 
@@ -88,7 +88,7 @@ export default function Navbar() {
 
         </Stack>
 
-        <Divider />
+        {/* <Divider />
 
         <List>
           {routes.map(route => {
@@ -106,7 +106,7 @@ export default function Navbar() {
               <Fragment key={route.path} />
             )
           })}
-        </List>
+        </List> */}
       </Stack>
     </Drawer>
   )
