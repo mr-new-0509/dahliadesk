@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Container, Box, Tab } from '@mui/material'
 import PageTitle from '../../components/PageTitle'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
+import CreatedAssetsTab from './tabs/CreatedAssetsTab'
 
 export default function Dashboard() {
   const [currentTab, setCurrentTab] = useState<string>("0")
@@ -20,9 +21,11 @@ export default function Dashboard() {
             <Tab label="Opted assets" value="1" />
             <Tab label="NFT collection" value="2" />
           </TabList>
-          <TabPanel value="0"></TabPanel>
-          <TabPanel value="1"></TabPanel>
-          <TabPanel value="2"></TabPanel>
+          <Box mt={3}>
+            <TabPanel value="0"><CreatedAssetsTab /></TabPanel>
+            <TabPanel value="1"></TabPanel>
+            <TabPanel value="2"></TabPanel>
+          </Box>
         </TabContext>
       </Box>
     </Container>
