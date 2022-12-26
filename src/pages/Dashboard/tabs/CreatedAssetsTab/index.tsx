@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Box, Stack, TextField, Icon as MuiIcon, FormControlLabel, Checkbox, Button } from '@mui/material'
 import { Icon } from '@iconify/react'
 import DialogCreateAsset from './DialogCreateAsset'
+import NoData from '../../../../components/NoData'
 
 export default function CreatedAssetsTab() {
   const [hideZeroBalance, setHideZeroBalance] = useState<boolean>(false)
@@ -14,6 +15,7 @@ export default function CreatedAssetsTab() {
   const openDialog = () => {
     setDialogOpened(true)
   }
+
   return (
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -38,6 +40,9 @@ export default function CreatedAssetsTab() {
           onClick={() => openDialog()}
         >Create asset</Button>
       </Stack>
+      <Box>
+        <NoData text="This account doesn't have any created assets" />
+      </Box>
       <DialogCreateAsset
         dialogOpened={dialogOpened}
         setDialogOpened={setDialogOpened}

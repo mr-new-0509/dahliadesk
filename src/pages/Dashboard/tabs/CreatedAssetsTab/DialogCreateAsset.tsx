@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Grid, Icon as MuiIcon, IconButton, MenuItem, Stack, Switch, TextField, Tooltip } from '@mui/material'
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Grid, Icon as MuiIcon, IconButton, MenuItem, Switch, TextField, Tooltip } from '@mui/material'
 import { Icon } from '@iconify/react';
 
 interface IProps {
