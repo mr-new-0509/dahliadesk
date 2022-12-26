@@ -71,7 +71,7 @@ function ConnectWalletProvider({ children }: IProps) {
   const disconnectAct = () => {
     dispatch({
       type: 'SET_CONNECTED',
-      payload: true
+      payload: false
     });
     dispatch({
       type: 'SET_NETWORK',

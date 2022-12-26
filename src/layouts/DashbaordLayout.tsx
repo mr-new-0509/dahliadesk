@@ -2,12 +2,17 @@ import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Icon } from "@iconify/react"
 import { Avatar, Box, Button, Divider, Fab, Grid, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack, Typography } from "@mui/material"
-import { Outlet } from "react-router"
+import { Outlet, useNavigate } from "react-router"
 import ScrollFab from "../components/ScrollFab"
+import useConnectWallet from '../hooks/useConnectWallet';
 
 export default function DashboardLayout() {
-  const handleDisconnectWallet = () => {
+  const navigate = useNavigate()
+  const { disconnectAct } = useConnectWallet()
 
+  const handleDisconnectWallet = () => {
+    disconnectAct()
+    navigate('/')
   }
 
   return (

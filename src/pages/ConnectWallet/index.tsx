@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { Box, Button, FormControlLabel, Grid, Radio, RadioGroup, Stack, Typography } from '@mui/material';
-import useConnectWallet from '../hooks/useConnectWallet';
-import { TNetwork } from '../utils/types';
+import { TNetwork } from '../../utils/types';
+import DialogConnectWallet from './DialogConnectWallet';
 
 export default function ConnectWallet() {
-  const { connectAct } = useConnectWallet()
 
   const [network, setNetwork] = useState<TNetwork>('testnet');
+  const [dialogOpened, setDialogOpened] = useState<boolean>(false)
+
+  const openDialog = () => {
+    setDialogOpened(true)
+  }
 
   const handleChangeNetwork = (networkName: string) => {
     if (networkName === 'mainnet') {
@@ -16,9 +20,6 @@ export default function ConnectWallet() {
     }
   };
 
-  const handleConnectWallet = () => {
-    connectAct(network)
-  }
   return (
     <Box>
       <Grid container>
@@ -35,9 +36,9 @@ export default function ConnectWallet() {
         </Grid>
 
         <Grid item xs={12} md={3}>
-          <Stack px={3} height="100vh">
-            <Box component="img" src="/assets/images/logo.png" alt="logo" width={148} mt={3} />
-            <Stack flexGrow={1} justifyContent="center" alignItems="center" spacing={4}>
+          <Stack px={3} justifyContent="center" alignItems="center" spacing={16}>
+            <Box component="img" src="/assets/images/logo.png" alt="logo" width={148} mt={14} />
+            <Stack justifyContent="center" alignItems="center" spacing={4}>
               <Typography component="h2" textAlign="center" fontSize={24}>
                 Select network
               </Typography>
@@ -47,11 +48,15 @@ export default function ConnectWallet() {
                 <FormControlLabel value="mainnet" control={<Radio />} label="Mainnet" />
               </RadioGroup>
 
-              <Button variant="contained" onClick={() => handleConnectWallet()}>Connect Wallet</Button>
+              <Button variant="contained" onClick={() => openDialog()}>Connect Wallet</Button>
             </Stack>
           </Stack>
         </Grid>
       </Grid>
+      <DialogConnectWallet
+        dialogOpened={dialogOpened}
+        setDialogOpened={setDialogOpened}
+      />
     </Box>
   )
 }
