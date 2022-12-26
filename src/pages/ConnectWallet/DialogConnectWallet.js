@@ -1,10 +1,11 @@
 /* global AlgoSigner */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Icon as MuiIcon, Dialog, DialogContent, IconButton, Stack, Typography, List, ListItem, ListItemIcon, Avatar, ListItemAvatar, ListItemText, ListItemButton } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { grey } from '@mui/material/colors';
 import MyAlgoConnect from '@randlabs/myalgo-connect';
+import { PeraWalletConnect } from "@perawallet/connect";
 import useAlertMessage from '../../hooks/useAlertMessage';
 import { MSG_NO_ACCOUNT, MSG_NO_ALGO_SIGNER, WARNING } from '../../utils/constants';
 import useConnectWallet from '../../hooks/useConnectWallet';
@@ -13,12 +14,15 @@ const myAlgoWallet = new MyAlgoConnect();
 
 export default function DialogConnectWallet({ dialogOpened, setDialogOpened, network }) {
   const { openAlert } = useAlertMessage();
-  const { connectAct } = useConnectWallet();
+  const { connectAct, disconnectAct } = useConnectWallet();
 
   const closeDialog = () => {
     setDialogOpened(false);
   };
 
+  /** 
+   * Connect wallet by AlgoSigner
+   */
   const connectByAlgoSigner = async () => {
     if (typeof AlgoSigner !== 'undefined') {
       let resp = await AlgoSigner.connect();
@@ -43,6 +47,9 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
     }
   };
 
+  /**
+   * Connect wallet by MyAlgo wallet
+   */
   const connectByMyAlgo = async () => {
     let accounts = await myAlgoWallet.connect();
     if (accounts.length > 0) {
@@ -55,8 +62,25 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
     }
   };
 
+  /**
+   * Connect wallet by Pera wallet
+   */
   const connectByPera = () => {
+    console.log('connectByPera');
+    let peraWallet = new PeraWalletConnect({
+      network
+    });
 
+    peraWallet.connect()
+      .then(accounts => {
+        // Setup the disconnect event listener
+        peraWallet.connector?.on("disconnect", () => {
+          peraWallet.disconnect();
+          disconnectAct();
+        });
+        console.log('>>>>>>>> accounts => ', accounts);
+        connectAct(network, accounts[0].address);
+      });
   };
 
   return (
