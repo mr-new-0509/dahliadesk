@@ -8,7 +8,7 @@ import useConnectWallet from '../hooks/useConnectWallet';
 
 export default function DashboardLayout() {
   const navigate = useNavigate()
-  const { disconnectAct } = useConnectWallet()
+  const { currentUser, disconnectAct } = useConnectWallet()
 
   const handleDisconnectWallet = () => {
     disconnectAct()
@@ -32,7 +32,7 @@ export default function DashboardLayout() {
               {/* wallet address */}
               <Box width="100%">
                 <Typography textAlign="center" px={2} color="white" sx={{ overflowWrap: 'break-word' }} fontSize={12}>
-                  OQG6YFOV4S3PN63YDY4ENC32X4NMLV4LWWKARRUPTEVKX6SCOE6IUWCOFY
+                  {currentUser}
                 </Typography>
               </Box>
 

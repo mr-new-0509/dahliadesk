@@ -4,8 +4,7 @@ import { TNetwork } from '../../utils/types';
 import DialogConnectWallet from './DialogConnectWallet';
 
 export default function ConnectWallet() {
-
-  const [network, setNetwork] = useState<TNetwork>('testnet');
+  const [network, setNetwork] = useState<TNetwork>('TestNet');
   const [dialogOpened, setDialogOpened] = useState<boolean>(false)
 
   const openDialog = () => {
@@ -13,10 +12,10 @@ export default function ConnectWallet() {
   }
 
   const handleChangeNetwork = (networkName: string) => {
-    if (networkName === 'mainnet') {
-      setNetwork('mainnet')
+    if (networkName === 'MainNet') {
+      setNetwork('MainNet')
     } else {
-      setNetwork('testnet')
+      setNetwork('TestNet')
     }
   };
 
@@ -44,8 +43,8 @@ export default function ConnectWallet() {
               </Typography>
 
               <RadioGroup row value={network} onChange={(e) => handleChangeNetwork(e.target.value)}>
-                <FormControlLabel value="testnet" control={<Radio />} label="Testnet" />
-                <FormControlLabel value="mainnet" control={<Radio />} label="Mainnet" />
+                <FormControlLabel value="TestNet" control={<Radio />} label="TestNet" />
+                <FormControlLabel value="MainNet" control={<Radio />} label="MainNet" />
               </RadioGroup>
 
               <Button variant="contained" onClick={() => openDialog()}>Connect Wallet</Button>
@@ -56,6 +55,7 @@ export default function ConnectWallet() {
       <DialogConnectWallet
         dialogOpened={dialogOpened}
         setDialogOpened={setDialogOpened}
+        network={network}
       />
     </Box>
   )

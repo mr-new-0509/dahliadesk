@@ -1,1 +1,1 @@
-export type TNetwork = "testnet" | "mainnet";
+export type TNetwork = "TestNet" | "MainNet";

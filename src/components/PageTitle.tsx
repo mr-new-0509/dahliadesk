@@ -16,11 +16,11 @@ export default function PageTitle() {
         Dashboard
       </Typography>
       <ButtonGroup>
-        <Button onClick={() => handleSwitchNetwork('testnet')} variant={network === 'testnet' ? 'contained' : 'outlined'}>
-          Testnet
+        <Button onClick={() => handleSwitchNetwork('TestNet')} variant={network === 'TestNet' ? 'contained' : 'outlined'}>
+          TestNet
         </Button>
-        <Button onClick={() => handleSwitchNetwork('mainnet')} variant={network === 'mainnet' ? 'contained' : 'outlined'}>
-          Mainnet
+        <Button onClick={() => handleSwitchNetwork('MainNet')} variant={network === 'MainNet' ? 'contained' : 'outlined'}>
+          MainNet
         </Button>
       </ButtonGroup>
     </Stack>

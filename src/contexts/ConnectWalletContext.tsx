@@ -5,6 +5,7 @@ import { TNetwork } from '../utils/types';
 
 interface IInitialState {
   connected: boolean;
+  currentUser: string;
   network?: TNetwork;
 }
 
@@ -25,6 +26,7 @@ interface IHandlers {
 
 const initialState: IInitialState = {
   connected: false,
+  currentUser: ''
 };
 
 const handlers: IHandlers = {
@@ -40,6 +42,12 @@ const handlers: IHandlers = {
       network: action.payload
     };
   },
+  SET_CURRENT_USER: (state: object, action: IAction) => {
+    return {
+      ...state,
+      currentUser: action.payload
+    };
+  }
 };
 
 const reducer = (state: object, action: IAction) =>
@@ -48,7 +56,7 @@ const reducer = (state: object, action: IAction) =>
 //  Context
 const ConnectWalletContext = createContext({
   ...initialState,
-  connectAct: (network: TNetwork) => Promise.resolve(),
+  connectAct: (network: TNetwork, currentUser: string) => Promise.resolve(),
   disconnectAct: () => Promise.resolve(),
   switchNetworkAct: (network: TNetwork) => Promise.resolve()
 });
@@ -57,10 +65,14 @@ const ConnectWalletContext = createContext({
 function ConnectWalletProvider({ children }: IProps) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const connectAct = (network: TNetwork) => {
+  const connectAct = (network: TNetwork, currentUser: string) => {
     dispatch({
       type: 'SET_CONNECTED',
       payload: true
+    });
+    dispatch({
+      type: 'SET_CURRENT_USER',
+      payload: currentUser
     });
     dispatch({
       type: 'SET_NETWORK',
@@ -72,6 +84,10 @@ function ConnectWalletProvider({ children }: IProps) {
     dispatch({
       type: 'SET_CONNECTED',
       payload: false
+    });
+    dispatch({
+      type: 'SET_CURRENT_USER',
+      payload: ''
     });
     dispatch({
       type: 'SET_NETWORK',

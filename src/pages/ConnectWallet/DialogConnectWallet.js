@@ -1,18 +1,63 @@
-import React from 'react'
-import { Icon as MuiIcon, Dialog, DialogContent, IconButton, Stack, Typography, List, ListItem, ListItemIcon, Avatar, ListItemAvatar, ListItemText, ListItemButton } from '@mui/material'
+/* global AlgoSigner */
+
+import React, { useEffect } from 'react';
+import { Icon as MuiIcon, Dialog, DialogContent, IconButton, Stack, Typography, List, ListItem, ListItemIcon, Avatar, ListItemAvatar, ListItemText, ListItemButton } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { grey } from '@mui/material/colors';
+import MyAlgoConnect from '@randlabs/myalgo-connect';
+import useAlertMessage from '../../hooks/useAlertMessage';
+import { MSG_NO_ACCOUNT, MSG_NO_ALGO_SIGNER, WARNING } from '../../utils/constants';
+import useConnectWallet from '../../hooks/useConnectWallet';
 
-interface IProps {
-  dialogOpened: boolean;
-  setDialogOpened: Function;
-}
+const myAlgoWallet = new MyAlgoConnect();
 
-export default function DialogConnectWallet({ dialogOpened, setDialogOpened }: IProps) {
+export default function DialogConnectWallet({ dialogOpened, setDialogOpened, network }) {
+  const { openAlert } = useAlertMessage();
+  const { connectAct } = useConnectWallet();
 
   const closeDialog = () => {
-    setDialogOpened(false)
-  }
+    setDialogOpened(false);
+  };
+
+  const connectByAlgoSigner = async () => {
+    if (typeof AlgoSigner !== 'undefined') {
+      let resp = await AlgoSigner.connect();
+      console.log('>>>>>>> resp => ', resp);
+      let accounts = await AlgoSigner.accounts({
+        ledger: network
+      });
+      console.log('>>>>>> accounts => ', accounts);
+      if (accounts.length > 0) {
+        connectAct(network, accounts[0].address);
+      } else {
+        openAlert({
+          severity: WARNING,
+          message: MSG_NO_ACCOUNT
+        });
+      }
+    } else {
+      openAlert({
+        severity: WARNING,
+        message: MSG_NO_ALGO_SIGNER
+      });
+    }
+  };
+
+  const connectByMyAlgo = async () => {
+    let accounts = await myAlgoWallet.connect();
+    if (accounts.length > 0) {
+      connectAct(network, accounts[0].address);
+    } else {
+      openAlert({
+        severity: WARNING,
+        message: MSG_NO_ACCOUNT
+      });
+    }
+  };
+
+  const connectByPera = () => {
+
+  };
 
   return (
     <Dialog open={dialogOpened} onClose={() => closeDialog()} maxWidth="xs" fullWidth>
@@ -33,7 +78,7 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened }: I
       <DialogContent>
         <List>
           <ListItem>
-            <ListItemButton>
+            <ListItemButton onClick={() => connectByAlgoSigner()}>
               <ListItemAvatar>
                 <Avatar src="/assets/images/algo-signer.jpg" alt="" />
               </ListItemAvatar>
@@ -50,7 +95,7 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened }: I
           </ListItem>
 
           <ListItem>
-            <ListItemButton>
+            <ListItemButton onClick={() => connectByMyAlgo()}>
               <ListItemAvatar>
                 <Avatar src="/assets/images/myalgo-wallet.svg" alt="" />
               </ListItemAvatar>
@@ -67,7 +112,7 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened }: I
           </ListItem>
 
           <ListItem>
-            <ListItemButton>
+            <ListItemButton onClick={() => connectByPera()}>
               <ListItemAvatar>
                 <Avatar src="/assets/images/pera-wallet.svg" alt="" />
               </ListItemAvatar>
@@ -89,5 +134,5 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened }: I
         By connecting, I accept Dahliadesk Terms of Service
       </Typography>
     </Dialog>
-  )
+  );
 }
