@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { Box, Stack, TextField, Icon as MuiIcon, FormControlLabel, Checkbox, Button } from '@mui/material'
 import { Icon } from '@iconify/react'
-import DialogCreateAsset from './DialogCreateAsset'
+import DialogOptInAsset from './DialogOptInAsset'
 import NoData from '../../../../components/NoData'
 
-export default function CreatedAssetsTab() {
+export default function TabOptedAssets() {
   const [hideZeroBalance, setHideZeroBalance] = useState<boolean>(false)
   const [dialogOpened, setDialogOpened] = useState<boolean>(false)
 
@@ -38,12 +38,12 @@ export default function CreatedAssetsTab() {
           variant="contained"
           startIcon={<Icon icon="material-symbols:add" />}
           onClick={() => openDialog()}
-        >Create asset</Button>
+        >Opt-in asset</Button>
       </Stack>
       <Box>
         <NoData text="This account doesn't have any created assets" />
       </Box>
-      <DialogCreateAsset
+      <DialogOptInAsset
         dialogOpened={dialogOpened}
         setDialogOpened={setDialogOpened}
       />

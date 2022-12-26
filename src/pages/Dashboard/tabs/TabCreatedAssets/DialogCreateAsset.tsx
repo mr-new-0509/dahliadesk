@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Grid, Icon as MuiIcon, IconButton, MenuItem, Switch, TextField, Tooltip } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Grid, Icon as MuiIcon, IconButton, MenuItem, Stack, Switch, TextField, Tooltip } from '@mui/material'
 import { Icon } from '@iconify/react';
 
 interface IProps {
@@ -19,11 +19,11 @@ export default function DialogCreateAsset({ dialogOpened, setDialogOpened }: IPr
 
   return (
     <Dialog open={dialogOpened} onClose={() => closeDialog()} maxWidth="sm" fullWidth>
-      <Box position="relative">
-        <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => closeDialog()}>
+      <Stack direction="row" justifyContent="end" px={2} pt={2}>
+        <IconButton onClick={() => closeDialog()}>
           <Icon icon="material-symbols:close-rounded" />
         </IconButton>
-      </Box>
+      </Stack>
 
       <DialogTitle>
         Asset Details
