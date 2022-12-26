@@ -4,6 +4,7 @@ import PageTitle from '../../components/PageTitle'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import TabCreatedAssets from './tabs/TabCreatedAssets'
 import TabOptedAssets from './tabs/TabOptedAssets'
+import TabNftCollection from './tabs/TabNftCollection'
 
 export default function Dashboard() {
   const [currentTab, setCurrentTab] = useState<string>("0")
@@ -27,7 +28,7 @@ export default function Dashboard() {
           <Box mt={3}>
             <TabPanel value="0"><TabCreatedAssets /></TabPanel>
             <TabPanel value="1"><TabOptedAssets /></TabPanel>
-            <TabPanel value="2"></TabPanel>
+            <TabPanel value="2"><TabNftCollection /></TabPanel>
           </Box>
         </TabContext>
       </Box>
