@@ -10,3 +10,7 @@ export const MSG_NO_ALGO_SIGNER =
   "No AlgoSigner in your browser. Please install it, then try again.";
 export const MSG_NO_ACCOUNT =
   "You have no account in your wallet, Please create one.";
+
+export const WALLET_ALGO_SIGNER = "AlgoSigner";
+export const WALLET_MY_ALGO = "MyAlgo";
+export const WALLET_PERA = "Pera";

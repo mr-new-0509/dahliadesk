@@ -1,10 +1,11 @@
 import { createContext, useReducer } from 'react';
-import { TNetwork } from '../utils/types';
+import { TNetwork, TWalletName } from '../utils/types';
 
 /* --------------------------------------------------------------- */
 
 interface IInitialState {
   currentUser: string;
+  walletName?: TWalletName;
   network?: TNetwork;
 }
 
@@ -24,7 +25,7 @@ interface IHandlers {
 /* --------------------------------------------------------------- */
 
 const initialState: IInitialState = {
-  currentUser: ''
+  currentUser: '',
 };
 
 const handlers: IHandlers = {
@@ -39,7 +40,13 @@ const handlers: IHandlers = {
       ...state,
       currentUser: action.payload
     };
-  }
+  },
+  SET_WALLET_NAME: (state: object, action: IAction) => {
+    return {
+      ...state,
+      walletName: action.payload
+    };
+  },
 };
 
 const reducer = (state: object, action: IAction) =>
@@ -48,43 +55,43 @@ const reducer = (state: object, action: IAction) =>
 //  Context
 const ConnectWalletContext = createContext({
   ...initialState,
-  connectAct: (network: TNetwork, currentUser: string) => Promise.resolve(),
+  connectAct: (network: TNetwork, currentUser: string, walletName: TWalletName) => Promise.resolve(),
   disconnectAct: () => Promise.resolve(),
-  switchNetworkAct: (network: TNetwork) => Promise.resolve()
 });
 
 //  Provider
 function ConnectWalletProvider({ children }: IProps) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const connectAct = (network: TNetwork, currentUser: string) => {
+  const connectAct = (network: TNetwork, currentUser: string, walletName: TWalletName) => {
     dispatch({
       type: 'SET_CURRENT_USER',
       payload: currentUser
-    });
+    })
     dispatch({
       type: 'SET_NETWORK',
       payload: network
-    });
+    })
+    dispatch({
+      type: 'SET_WALLET_NAME',
+      payload: walletName
+    })
   };
 
   const disconnectAct = () => {
     dispatch({
       type: 'SET_CURRENT_USER',
       payload: ''
-    });
+    })
     dispatch({
       type: 'SET_NETWORK',
       payload: undefined
-    });
-  };
-
-  const switchNetworkAct = (network: TNetwork) => {
-    dispatch({
-      type: 'SET_NETWORK',
-      payload: network
     })
-  }
+    dispatch({
+      type: 'SET_WALLET_NAME',
+      payload: undefined
+    })
+  };
 
   return (
     <ConnectWalletContext.Provider
@@ -92,7 +99,6 @@ function ConnectWalletProvider({ children }: IProps) {
         ...state,
         connectAct,
         disconnectAct,
-        switchNetworkAct
       }}
     >
       {children}

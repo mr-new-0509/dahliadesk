@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, FormControlLabel, Grid, Radio, RadioGroup, Stack, Typography } from '@mui/material';
 import { TNetwork } from '../../utils/types';
-import DialogConnectWallet from './DialogConnectWallet';
+import DialogConnectWallet from '../../components/DialogConnectWallet';
 
 export default function ConnectWallet() {
   const [network, setNetwork] = useState<TNetwork>('TestNet');

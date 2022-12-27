@@ -6,9 +6,9 @@ import { Icon } from '@iconify/react';
 import { grey } from '@mui/material/colors';
 import MyAlgoConnect from '@randlabs/myalgo-connect';
 import { PeraWalletConnect } from "@perawallet/connect";
-import useAlertMessage from '../../hooks/useAlertMessage';
-import { MSG_NO_ACCOUNT, MSG_NO_ALGO_SIGNER, WARNING } from '../../utils/constants';
-import useConnectWallet from '../../hooks/useConnectWallet';
+import useAlertMessage from '../hooks/useAlertMessage';
+import { MSG_NO_ACCOUNT, MSG_NO_ALGO_SIGNER, WALLET_ALGO_SIGNER, WALLET_MY_ALGO, WALLET_PERA, WARNING } from '../utils/constants';
+import useConnectWallet from '../hooks/useConnectWallet';
 
 const myAlgoWallet = new MyAlgoConnect();
 
@@ -25,14 +25,13 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
    */
   const connectByAlgoSigner = async () => {
     if (typeof AlgoSigner !== 'undefined') {
-      let resp = await AlgoSigner.connect();
-      console.log('>>>>>>> resp => ', resp);
+      await AlgoSigner.connect();
       let accounts = await AlgoSigner.accounts({
         ledger: network
       });
-      console.log('>>>>>> accounts => ', accounts);
       if (accounts.length > 0) {
-        connectAct(network, accounts[0].address);
+        connectAct(network, accounts[0].address, WALLET_ALGO_SIGNER);
+        closeDialog();
       } else {
         openAlert({
           severity: WARNING,
@@ -53,7 +52,8 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
   const connectByMyAlgo = async () => {
     let accounts = await myAlgoWallet.connect();
     if (accounts.length > 0) {
-      connectAct(network, accounts[0].address);
+      connectAct(network, accounts[0].address, WALLET_MY_ALGO);
+      closeDialog();
     } else {
       openAlert({
         severity: WARNING,
@@ -66,7 +66,6 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
    * Connect wallet by Pera wallet
    */
   const connectByPera = () => {
-    console.log('connectByPera');
     let peraWallet = new PeraWalletConnect({
       network
     });
@@ -79,7 +78,8 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
           disconnectAct();
         });
         console.log('>>>>>>>> accounts => ', accounts);
-        connectAct(network, accounts[0].address);
+        connectAct(network, accounts[0].address, WALLET_PERA);
+        closeDialog();
       });
   };
 

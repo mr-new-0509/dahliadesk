@@ -4,10 +4,9 @@ import useConnectWallet from '../hooks/useConnectWallet'
 import { TNetwork } from '../utils/types'
 
 export default function PageTitle() {
-  const { network, switchNetworkAct } = useConnectWallet()
+  const { network } = useConnectWallet()
 
   const handleSwitchNetwork = (network: TNetwork) => {
-    switchNetworkAct(network)
   }
 
   return (

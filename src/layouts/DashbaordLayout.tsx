@@ -9,13 +9,15 @@ import useConnectWallet from '../hooks/useConnectWallet'
 import DialogQrCode from './DialogQrCode'
 import useAlertMessage from '../hooks/useAlertMessage'
 import { SUCCESS } from '../utils/constants'
+import DialogConnectWallet from '../components/DialogConnectWallet'
 
 export default function DashboardLayout() {
   const navigate = useNavigate()
-  const { currentUser, disconnectAct } = useConnectWallet()
+  const { currentUser, disconnectAct, network } = useConnectWallet()
   const { openAlert } = useAlertMessage()
 
-  const [dialogOpened, setDialogOpened] = useState<boolean>(false)
+  const [dialogOrCodeOpened, setDialogQrCodeOpened] = useState<boolean>(false)
+  const [dialogConnectWalletOpened, setDialogConnectWalletOpened] = useState<boolean>(false)
 
   const handleDisconnectWallet = () => {
     disconnectAct()
@@ -23,7 +25,11 @@ export default function DashboardLayout() {
   }
 
   const openDialogQrCode = () => {
-    setDialogOpened(true)
+    setDialogQrCodeOpened(true)
+  }
+
+  const openDialogConnectWallet = () => {
+    setDialogConnectWalletOpened(true)
   }
 
   const copyCurrentUser = () => {
@@ -66,7 +72,7 @@ export default function DashboardLayout() {
                   <Icon icon="mdi:data-matrix-scan" />
                 </Fab>
                 {/* Switch wallet */}
-                <Fab size="small" sx={{ fontSize: 18 }}>
+                <Fab size="small" sx={{ fontSize: 18 }} onClick={() => openDialogConnectWallet()}>
                   <Icon icon="system-uicons:swap" />
                 </Fab>
               </Stack>
@@ -114,8 +120,13 @@ export default function DashboardLayout() {
         </Grid>
       </Grid>
       <DialogQrCode
-        dialogOpened={dialogOpened}
-        setDialogOpened={setDialogOpened}
+        dialogOpened={dialogOrCodeOpened}
+        setDialogOpened={setDialogQrCodeOpened}
+      />
+      <DialogConnectWallet
+        dialogOpened={dialogConnectWalletOpened}
+        setDialogOpened={setDialogConnectWalletOpened}
+        network={network}
       />
     </Box >
   )
