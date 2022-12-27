@@ -1,18 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Icon } from "@iconify/react"
 import { Avatar, Box, Button, Divider, Fab, Grid, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack, Typography } from "@mui/material"
 import { Outlet, useNavigate } from "react-router"
 import ScrollFab from "../components/ScrollFab"
 import useConnectWallet from '../hooks/useConnectWallet';
+import DialogQrCode from './DialogQrCode';
 
 export default function DashboardLayout() {
   const navigate = useNavigate()
   const { currentUser, disconnectAct } = useConnectWallet()
 
+  const [dialogOpened, setDialogOpened] = useState<boolean>(false)
+
   const handleDisconnectWallet = () => {
     disconnectAct()
     navigate('/')
+  }
+
+  const openDialogQrCode = () => {
+    setDialogOpened(true)
   }
 
   return (
@@ -38,12 +45,15 @@ export default function DashboardLayout() {
 
               {/* functional buttons */}
               <Stack direction="row" justifyContent="center" alignItems="center" spacing={2}>
+                {/* Copy */}
                 <Fab size="small" sx={{ fontSize: 18 }}>
                   <Icon icon="ic:outline-file-copy" />
                 </Fab>
-                <Fab size="small" sx={{ fontSize: 18 }}>
+                {/* QR code */}
+                <Fab size="small" sx={{ fontSize: 18 }} onClick={() => openDialogQrCode()}>
                   <Icon icon="mdi:data-matrix-scan" />
                 </Fab>
+                {/* Switch wallet */}
                 <Fab size="small" sx={{ fontSize: 18 }}>
                   <Icon icon="system-uicons:swap" />
                 </Fab>
@@ -91,6 +101,10 @@ export default function DashboardLayout() {
           <ScrollFab />
         </Grid>
       </Grid>
+      <DialogQrCode
+        dialogOpened={dialogOpened}
+        setDialogOpened={setDialogOpened}
+      />
     </Box >
   )
 }

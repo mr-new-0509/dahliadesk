@@ -7,7 +7,7 @@ import ConnectWallet from '../pages/ConnectWallet';
 import Dashboard from '../pages/Dashboard';
 
 export default function Routes() {
-  const { connected } = useConnectWallet()
+  const { currentUser } = useConnectWallet()
 
   return useRoutes([
     {
@@ -15,7 +15,7 @@ export default function Routes() {
       children: [
         {
           path: '/connect-wallet',
-          element: connected ? <Navigate to="/dashboard" /> : <ConnectWallet />
+          element: currentUser ? <Navigate to="/dashboard" /> : <ConnectWallet />
         }
       ]
     },
@@ -34,7 +34,7 @@ export default function Routes() {
     },
     {
       path: '/',
-      element: connected ? <Navigate to="/dashboard" /> : <Navigate to="/connect-wallet" />
+      element: currentUser ? <Navigate to="/dashboard" /> : <Navigate to="/connect-wallet" />
     }
   ])
 }

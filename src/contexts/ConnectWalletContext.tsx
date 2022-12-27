@@ -4,7 +4,6 @@ import { TNetwork } from '../utils/types';
 /* --------------------------------------------------------------- */
 
 interface IInitialState {
-  connected: boolean;
   currentUser: string;
   network?: TNetwork;
 }
@@ -25,17 +24,10 @@ interface IHandlers {
 /* --------------------------------------------------------------- */
 
 const initialState: IInitialState = {
-  connected: false,
   currentUser: ''
 };
 
 const handlers: IHandlers = {
-  SET_CONNECTED: (state: object, action: IAction) => {
-    return {
-      ...state,
-      connected: action.payload
-    };
-  },
   SET_NETWORK: (state: object, action: IAction) => {
     return {
       ...state,
@@ -67,10 +59,6 @@ function ConnectWalletProvider({ children }: IProps) {
 
   const connectAct = (network: TNetwork, currentUser: string) => {
     dispatch({
-      type: 'SET_CONNECTED',
-      payload: true
-    });
-    dispatch({
       type: 'SET_CURRENT_USER',
       payload: currentUser
     });
@@ -81,10 +69,6 @@ function ConnectWalletProvider({ children }: IProps) {
   };
 
   const disconnectAct = () => {
-    dispatch({
-      type: 'SET_CONNECTED',
-      payload: false
-    });
     dispatch({
       type: 'SET_CURRENT_USER',
       payload: ''
