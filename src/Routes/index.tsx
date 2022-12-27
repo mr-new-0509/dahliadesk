@@ -24,7 +24,7 @@ export default function Routes() {
       children: [
         {
           path: '/dashboard',
-          element: <Dashboard />
+          element: currentUser ? <Dashboard /> : <Navigate to="/connect-wallet" />
         }
       ]
     },

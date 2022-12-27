@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import React, { useState } from 'react'
+import { Link as RouterLink } from 'react-router-dom'
 import { Icon } from "@iconify/react"
 import { Avatar, Box, Button, Divider, Fab, Grid, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack, Typography } from "@mui/material"
 import { Outlet, useNavigate } from "react-router"
+import copy from 'copy-to-clipboard'
 import ScrollFab from "../components/ScrollFab"
-import useConnectWallet from '../hooks/useConnectWallet';
-import DialogQrCode from './DialogQrCode';
+import useConnectWallet from '../hooks/useConnectWallet'
+import DialogQrCode from './DialogQrCode'
+import useAlertMessage from '../hooks/useAlertMessage'
+import { SUCCESS } from '../utils/constants'
 
 export default function DashboardLayout() {
   const navigate = useNavigate()
   const { currentUser, disconnectAct } = useConnectWallet()
+  const { openAlert } = useAlertMessage()
 
   const [dialogOpened, setDialogOpened] = useState<boolean>(false)
 
@@ -20,6 +24,14 @@ export default function DashboardLayout() {
 
   const openDialogQrCode = () => {
     setDialogOpened(true)
+  }
+
+  const copyCurrentUser = () => {
+    copy(currentUser)
+    openAlert({
+      severity: SUCCESS,
+      message: 'Copied.'
+    })
   }
 
   return (
@@ -46,7 +58,7 @@ export default function DashboardLayout() {
               {/* functional buttons */}
               <Stack direction="row" justifyContent="center" alignItems="center" spacing={2}>
                 {/* Copy */}
-                <Fab size="small" sx={{ fontSize: 18 }}>
+                <Fab size="small" sx={{ fontSize: 18 }} onClick={() => copyCurrentUser()}>
                   <Icon icon="ic:outline-file-copy" />
                 </Fab>
                 {/* QR code */}
