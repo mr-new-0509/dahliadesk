@@ -57,10 +57,6 @@ export default function DialogCreateAsset({ dialogOpened, setDialogOpened }) {
       const { assetName, unitName, totalIssuance, decimals, assetUrl, assetMetadataHash, manager, reserve, freeze, clawback, note } = values;
       let algodServer = '';
 
-      //  Encode note into Uint8Array
-      const enc = new TextEncoder();
-      const encodedNote = enc.encode(note);
-
       if (network === 'MainNet') {
         algodServer = ALGOD_SERVER_MAINNET;
       } else {
@@ -69,6 +65,10 @@ export default function DialogCreateAsset({ dialogOpened, setDialogOpened }) {
 
       const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, algodServer, ALGOD_PORT);
       const params = await algodClient.getTransactionParams().do();
+
+      //  Encode note into Uint8Array
+      const enc = new TextEncoder();
+      const encodedNote = enc.encode(note);
 
       let txn = algosdk.makeAssetCreateTxnWithSuggestedParams(
         currentUser,

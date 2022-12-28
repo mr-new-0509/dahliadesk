@@ -1,4 +1,6 @@
+import algosdk from 'algosdk';
 import React, { createContext, useReducer } from 'react';
+import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, DEFAULT_DECIMALS } from '../utils/constants';
 import { TNetwork, TWalletName } from '../utils/types';
 
 /* --------------------------------------------------------------- */
@@ -72,18 +74,29 @@ const ConnectWalletContext = createContext({
   ...initialState,
   connectAct: (network: TNetwork, currentUser: string, walletName: TWalletName) => Promise.resolve(),
   disconnectAct: () => Promise.resolve(),
+  setBalanceAct: (balance: number) => Promise.resolve()
 });
 
 //  Provider
 function ConnectWalletProvider({ children }: IProps) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const connectAct = (
+  const connectAct = async (
     network: TNetwork,
     currentUser: string,
     walletName: TWalletName,
     myAlgoWallet?: object
   ) => {
+    let algodServer = ''
+    if (network === 'MainNet') {
+      algodServer = ALGOD_SERVER_MAINNET;
+    } else {
+      algodServer = ALGOD_SERVER_TESTNET;
+    }
+    const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, algodServer, ALGOD_PORT);
+    const accountInfo = await algodClient.accountInformation(currentUser).do();
+
+    setBalanceAct(accountInfo['amount'])
     dispatch({
       type: 'SET_CURRENT_USER',
       payload: currentUser
@@ -127,12 +140,20 @@ function ConnectWalletProvider({ children }: IProps) {
     })
   };
 
+  const setBalanceAct = (balance: number) => {
+    dispatch({
+      type: 'SET_BALANCE',
+      payload: balance / 10 ** DEFAULT_DECIMALS
+    })
+  }
+
   return (
     <ConnectWalletContext.Provider
       value={{
         ...state,
         connectAct,
         disconnectAct,
+        setBalanceAct
       }}
     >
       {children}

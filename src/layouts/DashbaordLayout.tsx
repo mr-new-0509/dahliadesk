@@ -13,7 +13,7 @@ import DialogConnectWallet from '../components/DialogConnectWallet'
 
 export default function DashboardLayout() {
   const navigate = useNavigate()
-  const { currentUser, disconnectAct, network } = useConnectWallet()
+  const { currentUser, disconnectAct, network, balance } = useConnectWallet()
   const { openAlert } = useAlertMessage()
 
   const [dialogOrCodeOpened, setDialogQrCodeOpened] = useState<boolean>(false)
@@ -85,7 +85,7 @@ export default function DashboardLayout() {
               {/* balance */}
               <Stack direction="row" justifyContent="center" alignItems="center" spacing={1}>
                 <Typography component="span">
-                  Balance: 0
+                  Balance: {balance}
                 </Typography>
                 <Box component="img" src="/assets/images/algo.png" alt="" width={13} />
               </Stack>

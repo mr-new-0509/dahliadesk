@@ -20,3 +20,5 @@ export const ALGOD_TOKEN = "";
 export const ALGOD_SERVER_TESTNET = "https://testnet-api.algonode.cloud";
 export const ALGOD_SERVER_MAINNET = "https://mainnet-api.algonode.cloud";
 export const ALGOD_PORT = 443;
+
+export const DEFAULT_DECIMALS = 6;
