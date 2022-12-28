@@ -1,18 +1,30 @@
 import React, { useMemo } from 'react'
-import { Card, CardContent, CardHeader, FormLabel, Grid, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
+import { Card, CardContent, CardHeader, Grid, IconButton, Link, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { Icon } from '@iconify/react';
 import PopupState, { bindMenu, bindTrigger } from 'material-ui-popup-state';
 import PaperAccount from './PaperAccount';
+import useConnectWallet from '../../../../../hooks/useConnectWallet';
+import { BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_TESTNET_EXPLORER } from '../../../../../utils/constants';
 
 interface IProps {
   assetItem: any;
 }
 
 export default function CardAsset({ assetItem }: IProps) {
+  const { network } = useConnectWallet()
+
   const balanceToView = useMemo(() => {
     console.log('balanceToView')
     return assetItem['params']['total'] / 10 ** assetItem['params']['decimals']
   }, [assetItem])
+
+  const baseUrlOfExplorer = useMemo(() => {
+    if (network === 'MainNet') {
+      return BASE_URL_OF_MAINNET_EXPLORER
+    } else {
+      return BASE_URL_OF_TESTNET_EXPLORER
+    }
+  }, [network])
 
   return (
     <Card>
@@ -20,7 +32,12 @@ export default function CardAsset({ assetItem }: IProps) {
         title={assetItem['params']['name']}
         action={
           <Stack direction="row" alignItems="center">
-            <IconButton color="primary">
+            <IconButton
+              color="primary"
+              component={Link}
+              target="_blank"
+              href={`${baseUrlOfExplorer}/asset/${assetItem['index']}`}
+            >
               <Icon icon="ph:arrow-square-out-bold" />
             </IconButton>
             <PopupState variant="popover" popupId={`popup-${assetItem['index']}`}>
@@ -81,16 +98,16 @@ export default function CardAsset({ assetItem }: IProps) {
 
         <Grid container spacing={2} sx={{ mt: 4 }}>
           <Grid item xs={12} md={6}>
-            <PaperAccount label="Manager" address={assetItem['params']['manager']} />
+            <PaperAccount label="Manager" address={assetItem['params']['manager']} baseUrlOfExplorer={baseUrlOfExplorer} />
           </Grid>
           <Grid item xs={12} md={6}>
-            <PaperAccount label="Reserve" address={assetItem['params']['reserve']} />
+            <PaperAccount label="Reserve" address={assetItem['params']['reserve']} baseUrlOfExplorer={baseUrlOfExplorer} />
           </Grid>
           <Grid item xs={12} md={6}>
-            <PaperAccount label="Freeze" address={assetItem['params']['freeze']} />
+            <PaperAccount label="Freeze" address={assetItem['params']['freeze']} baseUrlOfExplorer={baseUrlOfExplorer} />
           </Grid>
           <Grid item xs={12} md={6}>
-            <PaperAccount label="Clawback" address={assetItem['params']['clawback']} />
+            <PaperAccount label="Clawback" address={assetItem['params']['clawback']} baseUrlOfExplorer={baseUrlOfExplorer} />
           </Grid>
         </Grid>
       </CardContent>

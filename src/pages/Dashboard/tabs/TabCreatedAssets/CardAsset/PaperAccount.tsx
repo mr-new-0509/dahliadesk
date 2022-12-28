@@ -1,16 +1,14 @@
 import React, { useMemo } from 'react'
 import { Box, FormLabel, Paper, Stack, Typography, Icon as MuiIcon, Link } from '@mui/material'
 import { Icon } from '@iconify/react';
-import useConnectWallet from '../../../../../hooks/useConnectWallet';
-import { BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_TESTNET_EXPLORER } from '../../../../../utils/constants';
 
 interface IProps {
   label: string;
   address?: string;
+  baseUrlOfExplorer: string;
 }
 
-export default function PaperAccount({ label, address }: IProps) {
-  const { network } = useConnectWallet()
+export default function PaperAccount({ label, address, baseUrlOfExplorer }: IProps) {
   const addressToView = useMemo(() => {
     if (address) {
       return `${address.slice(0, 10)}...${address.slice(-10)}`
@@ -18,14 +16,6 @@ export default function PaperAccount({ label, address }: IProps) {
       return '- None -'
     }
   }, [address])
-
-  const baseUrlOfExplorer = useMemo(() => {
-    if (network === 'MainNet') {
-      return BASE_URL_OF_MAINNET_EXPLORER
-    } else {
-      return BASE_URL_OF_TESTNET_EXPLORER
-    }
-  }, [network])
 
   return (
     <Box>
@@ -35,7 +25,7 @@ export default function PaperAccount({ label, address }: IProps) {
           <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
             <Link
               target="_blank"
-              href={`${baseUrlOfExplorer}/${address}`}
+              href={`${baseUrlOfExplorer}/address/${address}`}
               sx={{ textDecoration: 'none' }}
             >{addressToView}</Link>
             <MuiIcon component={Icon} icon="material-symbols:check-circle-rounded" color="primary" />
