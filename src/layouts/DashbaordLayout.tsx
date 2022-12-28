@@ -46,7 +46,7 @@ export default function DashboardLayout() {
         <Grid item md={2}>
           <Box height="100vh" bgcolor="#4fa7ef">
             <Stack direction="row" justifyContent="center" bgcolor="#316db7" py={3}>
-              <Box component="img" src="/assets/images/logo-white.png" alt="logo" width={148} />
+              <Box component="img" src="/assets/images/logo.png" alt="logo" width={148} />
             </Stack>
 
             {/* Wallet data */}
