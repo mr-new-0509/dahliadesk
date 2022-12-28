@@ -22,3 +22,7 @@ export const ALGOD_SERVER_MAINNET = "https://mainnet-api.algonode.cloud";
 export const ALGOD_PORT = 443;
 
 export const DEFAULT_DECIMALS = 6;
+
+export const BASE_URL_OF_TESTNET_EXPLORER =
+  "https://testnet.algoexplorer.io/address";
+export const BASE_URL_OF_MAINNET_EXPLORER = "https://algoexplorer.io/address";
