@@ -1,24 +1,33 @@
 import React, { useEffect, useState } from 'react'
-import { Box, Stack, TextField, Icon as MuiIcon, FormControlLabel, Checkbox, Button, Grid, Card, CardHeader, IconButton, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material'
+import { Box, Stack, TextField, Icon as MuiIcon, FormControlLabel, Checkbox, Button, Grid } from '@mui/material'
 import { Icon } from '@iconify/react'
 import algosdk from 'algosdk'
 import DialogCreateAsset from './DialogCreateAsset'
 import NoData from '../../../../components/NoData'
 import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_TOKEN, ALGOD_SERVER_TESTNET } from '../../../../utils/constants'
 import useConnectWallet from '../../../../hooks/useConnectWallet'
-import PopupState from 'material-ui-popup-state'
-import { bindMenu, bindTrigger } from 'material-ui-popup-state/hooks'
 import CardAsset from './CardAsset'
+import useLoading from '../../../../hooks/useLoading'
+import DialogSendAssets from './DialogSendAssets'
 
 export default function TabCreatedAssets() {
   const { network, currentUser, setBalanceAct } = useConnectWallet()
+  const { openLoading, closeLoading } = useLoading()
 
   const [hideZeroBalance, setHideZeroBalance] = useState<boolean>(false)
   const [dialogOpened, setDialogOpened] = useState<boolean>(false)
   const [createdAssets, setCreatedAssets] = useState<Array<any>>([])
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedAsset, setSelectedAsset] = useState(null)
+  const [dialogSendAssetsOpened, setDialogSendAssetsOpened] = useState<boolean>(false)
+  const [dialogModifyAssetOpened, setDialogModifyAssetOpened] = useState<boolean>(false)
+  const [dialogFreezeOpened, setDialogFreezeOpened] = useState<boolean>(false)
+  const [dialogRevokeAssetsOpened, setDialogRevokeAssetsOpened] = useState<boolean>(false)
+  const [dialogDeleteAssetOpened, setDialogAssetOpened] = useState<boolean>(false)
+  const [dialogDeployOpened, setDialogDeployOpened] = useState<boolean>(false)
+  const [dialogBurnSupplyOpened, setDialogBurnSupplyOpened] = useState<boolean>(false)
 
   useEffect(() => {
+    openLoading()
     let algodServer = ''
     if (network === 'MainNet') {
       algodServer = ALGOD_SERVER_MAINNET;
@@ -32,6 +41,7 @@ export default function TabCreatedAssets() {
       console.log('>>>>>>>> accountInfo => ', accountInfo)
       setBalanceAct(accountInfo.amount)
       setCreatedAssets(accountInfo['created-assets'])
+      closeLoading()
     })()
   }, [network])
 
@@ -76,6 +86,14 @@ export default function TabCreatedAssets() {
                   <Grid item xs={12} md={6} key={assetItem['index']}>
                     <CardAsset
                       assetItem={assetItem}
+                      setSelectedAsset={setSelectedAsset}
+                      setDialogSendAssetsOpened={setDialogSendAssetsOpened}
+                      setDialogModifyAssetOpened={setDialogModifyAssetOpened}
+                      setDialogFreezeOpened={setDialogFreezeOpened}
+                      setDialogRevokeAssetsOpened={setDialogRevokeAssetsOpened}
+                      setDialogAssetOpened={setDialogAssetOpened}
+                      setDialogDeployOpened={setDialogDeployOpened}
+                      setDialogBurnSupplyOpened={setDialogBurnSupplyOpened}
                     />
                   </Grid>
                 ))
@@ -90,6 +108,16 @@ export default function TabCreatedAssets() {
         dialogOpened={dialogOpened}
         setDialogOpened={setDialogOpened}
       />
+      {selectedAsset && (
+        <>
+          <DialogSendAssets
+            dialogOpened={dialogSendAssetsOpened}
+            setDialogOpened={setDialogSendAssetsOpened}
+            asset={selectedAsset}
+          />
+        </>
+      )}
+
     </Box>
   )
 }

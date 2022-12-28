@@ -1,6 +1,6 @@
 /* global AlgoSigner */
 import React, { useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Grid, Icon as MuiIcon, IconButton, MenuItem, Stack, Switch, TextField, Tooltip } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Grid, Icon as MuiIcon, IconButton, MenuItem, Stack, Switch, TextField, Tooltip, Typography } from '@mui/material';
 import { Icon } from '@iconify/react';
 import * as yup from 'yup';
 import { useFormik } from "formik";
@@ -14,12 +14,6 @@ const validSchema = yup.object().shape({
   assetName: yup.string().required(MSG_REQUIRED),
   unitName: yup.string().required(MSG_REQUIRED).max(8, "8 characters are available maximum."),
   totalIssuance: yup.number().min(1, 'Minimum value is 1.').required(MSG_REQUIRED),
-  // assetUrl: yup.string().required(MSG_REQUIRED),
-  // assetMetadataHash: yup.string().required(MSG_REQUIRED).length(32, 'Required length is 32.'),
-  // manager: yup.string().required(MSG_REQUIRED),
-  // reserve: yup.string().required(MSG_REQUIRED),
-  // freeze: yup.string().required(MSG_REQUIRED),
-  // clawback: yup.string().required(MSG_REQUIRED)
 });
 
 export default function DialogCreateAsset({ dialogOpened, setDialogOpened }) {
@@ -44,10 +38,10 @@ export default function DialogCreateAsset({ dialogOpened, setDialogOpened }) {
       decimals: 0,
       assetUrl: '',
       assetMetadataHash: '',
-      manager: '',
-      reserve: '',
-      freeze: '',
-      clawback: '',
+      manager: currentUser,
+      reserve: currentUser,
+      freeze: currentUser,
+      clawback: currentUser,
       note: ''
     },
     validationSchema: validSchema,
@@ -120,35 +114,30 @@ export default function DialogCreateAsset({ dialogOpened, setDialogOpened }) {
 
   const switchManager = (enabled) => {
     setManagerEnabled(enabled);
-    if (!enabled) {
-      formik.setFieldValue('manager', '');
-    }
+    formik.setFieldValue('manager', currentUser);
   };
 
   const switchReserve = (enabled) => {
     setReserveEnabled(enabled);
-    if (!enabled) {
-      formik.setFieldValue('reserve', '');
-    }
+    formik.setFieldValue('reserve', currentUser);
   };
 
   const switchFreeze = (enabled) => {
     setFreezeEnabled(enabled);
-    if (!enabled) {
-      formik.setFieldValue('freeze', '');
-    }
+    formik.setFieldValue('freeze', currentUser);
   };
 
   const switchClawback = (enabled) => {
     setClawbackEnabled(enabled);
-    if (!enabled) {
-      formik.setFieldValue('clawback', '');
-    }
+    formik.setFieldValue('clawback', currentUser);
   };
 
   return (
     <Dialog open={dialogOpened} onClose={() => closeDialog()} maxWidth="sm" fullWidth>
-      <Stack direction="row" justifyContent="end" px={2} pt={2}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" pr={2} pt={2}>
+        <DialogTitle component={Typography} fontWeight={700}>
+          Create asset
+        </DialogTitle>
         <IconButton onClick={() => closeDialog()}>
           <Icon icon="material-symbols:close-rounded" />
         </IconButton>
@@ -162,7 +151,7 @@ export default function DialogCreateAsset({ dialogOpened, setDialogOpened }) {
           <Grid item xs={12} md={6}>
             {/* Name */}
             <TextField
-              label="Name"
+              label="Name *"
               name="assetName"
               value={formik.values.assetName}
               onChange={formik.handleChange}
@@ -174,7 +163,7 @@ export default function DialogCreateAsset({ dialogOpened, setDialogOpened }) {
           <Grid item xs={12} md={6}>
             {/* Unit name */}
             <TextField
-              label="Unit name"
+              label="Unit name *"
               name="unitName"
               value={formik.values.unitName}
               onChange={formik.handleChange}

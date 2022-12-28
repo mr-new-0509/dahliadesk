@@ -8,13 +8,30 @@ import { BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_TESTNET_EXPLORER } from '../.
 
 interface IProps {
   assetItem: any;
+  setSelectedAsset: Function;
+  setDialogSendAssetsOpened: Function;
+  setDialogModifyAssetOpened: Function;
+  setDialogFreezeOpened: Function;
+  setDialogRevokeAssetsOpened: Function;
+  setDialogAssetOpened: Function;
+  setDialogDeployOpened: Function;
+  setDialogBurnSupplyOpened: Function;
 }
 
-export default function CardAsset({ assetItem }: IProps) {
+export default function CardAsset({
+  assetItem,
+  setSelectedAsset,
+  setDialogSendAssetsOpened,
+  setDialogModifyAssetOpened,
+  setDialogFreezeOpened,
+  setDialogRevokeAssetsOpened,
+  setDialogAssetOpened,
+  setDialogDeployOpened,
+  setDialogBurnSupplyOpened
+}: IProps) {
   const { network } = useConnectWallet()
 
   const balanceToView = useMemo(() => {
-    console.log('balanceToView')
     return assetItem['params']['total'] / 10 ** assetItem['params']['decimals']
   }, [assetItem])
 
@@ -25,6 +42,12 @@ export default function CardAsset({ assetItem }: IProps) {
       return BASE_URL_OF_TESTNET_EXPLORER
     }
   }, [network])
+
+  const handleSendAssets = (popupState: any) => {
+    setSelectedAsset(assetItem)
+    setDialogSendAssetsOpened(true)
+    popupState.close()
+  }
 
   return (
     <Card>
@@ -47,7 +70,7 @@ export default function CardAsset({ assetItem }: IProps) {
                     <Icon icon="material-symbols:more-vert" />
                   </IconButton>
                   <Menu {...bindMenu(popupState)}>
-                    <MenuItem>
+                    <MenuItem onClick={() => handleSendAssets(popupState)}>
                       <ListItemIcon><Icon icon="ic:outline-send" /></ListItemIcon>
                       <ListItemText>Send assets</ListItemText>
                     </MenuItem>
