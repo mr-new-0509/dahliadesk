@@ -8,6 +8,7 @@ interface IInitialState {
   walletName?: TWalletName;
   network?: TNetwork;
   balance: number;
+  myAlgoWallet?: object;
 }
 
 interface IAction {
@@ -54,7 +55,13 @@ const handlers: IHandlers = {
       ...state,
       balance: action.payload
     };
-  }
+  },
+  SET_MY_ALGO_WALLET: (state: object, action: IAction) => {
+    return {
+      ...state,
+      myAlgoWallet: action.payload
+    };
+  },
 };
 
 const reducer = (state: object, action: IAction) =>
@@ -71,7 +78,12 @@ const ConnectWalletContext = createContext({
 function ConnectWalletProvider({ children }: IProps) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const connectAct = (network: TNetwork, currentUser: string, walletName: TWalletName) => {
+  const connectAct = (
+    network: TNetwork,
+    currentUser: string,
+    walletName: TWalletName,
+    myAlgoWallet?: object
+  ) => {
     dispatch({
       type: 'SET_CURRENT_USER',
       payload: currentUser
@@ -84,6 +96,12 @@ function ConnectWalletProvider({ children }: IProps) {
       type: 'SET_WALLET_NAME',
       payload: walletName
     })
+    if (walletName === 'MyAlgo') {
+      dispatch({
+        type: 'SET_MY_ALGO_WALLET',
+        payload: myAlgoWallet
+      })
+    }
   };
 
   const disconnectAct = () => {
@@ -102,6 +120,10 @@ function ConnectWalletProvider({ children }: IProps) {
     dispatch({
       type: 'SET_BALANCE',
       payload: 0
+    })
+    dispatch({
+      type: 'SET_MY_ALGO_WALLET',
+      payload: null
     })
   };
 

@@ -53,7 +53,8 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
   const connectByMyAlgo = async () => {
     let accounts = await myAlgoWallet.connect();
     if (accounts.length > 0) {
-      connectAct(network, accounts[0].address, WALLET_MY_ALGO);
+      console.log('>>>>>>>> myAlgoWallet => ', myAlgoWallet);
+      connectAct(network, accounts[0].address, WALLET_MY_ALGO, myAlgoWallet);
       getBalanceOfCurrentUser(accounts[0].address, network);
       closeDialog();
     } else {

@@ -1,39 +1,40 @@
-import React, { useState } from 'react'
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Grid, Icon as MuiIcon, IconButton, MenuItem, Stack, Switch, TextField, Tooltip } from '@mui/material'
-import { Icon } from '@iconify/react'
-import * as yup from 'yup'
+/* global AlgoSigner */
+import React, { useState } from 'react';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Grid, Icon as MuiIcon, IconButton, MenuItem, Stack, Switch, TextField, Tooltip } from '@mui/material';
+import { Icon } from '@iconify/react';
+import * as yup from 'yup';
 import { useFormik } from "formik";
-import { MSG_REQUIRED } from '../../../../utils/constants';
+import algosdk from 'algosdk';
+import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, MSG_REQUIRED, SUCCESS } from '../../../../utils/constants';
 import useConnectWallet from '../../../../hooks/useConnectWallet';
-
-interface IProps {
-  dialogOpened: boolean;
-  setDialogOpened: Function;
-}
+import useLoading from '../../../../hooks/useLoading';
+import useAlertMessage from '../../../../hooks/useAlertMessage';
 
 const validSchema = yup.object().shape({
   assetName: yup.string().required(MSG_REQUIRED),
-  unitName: yup.string().required(MSG_REQUIRED),
+  unitName: yup.string().required(MSG_REQUIRED).max(8, "8 characters are available maximum."),
   totalIssuance: yup.number().min(1, 'Minimum value is 1.').required(MSG_REQUIRED),
-  assetUrl: yup.string().required(MSG_REQUIRED),
-  assetMetadataHash: yup.string().required(MSG_REQUIRED).length(32, 'Required length is 32.'),
-  manager: yup.string().required(MSG_REQUIRED),
-  reserve: yup.string().required(MSG_REQUIRED),
-  freeze: yup.string().required(MSG_REQUIRED),
-  clawback: yup.string().required(MSG_REQUIRED)
-})
+  // assetUrl: yup.string().required(MSG_REQUIRED),
+  // assetMetadataHash: yup.string().required(MSG_REQUIRED).length(32, 'Required length is 32.'),
+  // manager: yup.string().required(MSG_REQUIRED),
+  // reserve: yup.string().required(MSG_REQUIRED),
+  // freeze: yup.string().required(MSG_REQUIRED),
+  // clawback: yup.string().required(MSG_REQUIRED)
+});
 
-export default function DialogCreateAsset({ dialogOpened, setDialogOpened }: IProps) {
-  const { currentUser } = useConnectWallet()
+export default function DialogCreateAsset({ dialogOpened, setDialogOpened }) {
+  const { currentUser, network, myAlgoWallet, walletName } = useConnectWallet();
+  const { openLoading, closeLoading } = useLoading();
+  const { openAlert } = useAlertMessage();
 
-  const [managerEnabled, setManagerEnabled] = useState<boolean>(false)
-  const [reserveEnabled, setReserveEnabled] = useState<boolean>(false)
-  const [freezeEnabled, setFreezeEnabled] = useState<boolean>(false)
-  const [clawbackEnabled, setClawbackEnabled] = useState<boolean>(false)
+  const [managerEnabled, setManagerEnabled] = useState(false);
+  const [reserveEnabled, setReserveEnabled] = useState(false);
+  const [freezeEnabled, setFreezeEnabled] = useState(false);
+  const [clawbackEnabled, setClawbackEnabled] = useState(false);
 
   const closeDialog = () => {
-    setDialogOpened(false)
-  }
+    setDialogOpened(false);
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -43,38 +44,107 @@ export default function DialogCreateAsset({ dialogOpened, setDialogOpened }: IPr
       decimals: 0,
       assetUrl: '',
       assetMetadataHash: '',
-      manager: currentUser,
-      reserve: currentUser,
-      freeze: currentUser,
-      clawback: currentUser,
+      manager: '',
+      reserve: '',
+      freeze: '',
+      clawback: '',
       note: ''
     },
     validationSchema: validSchema,
-    onSubmit: (values) => {
-      console.log('>>>>>>>>>> values => ', values)
-      let { assetName, unitName, totalIssuance, decimals, assetUrl, assetMetadataHash, manager, reserve, freeze, clawback, note } = values
+    onSubmit: async (values) => {
+      openLoading();
+      console.log('>>>>>>>>>> values => ', values);
+      const { assetName, unitName, totalIssuance, decimals, assetUrl, assetMetadataHash, manager, reserve, freeze, clawback, note } = values;
+      let algodServer = '';
+
+      //  Encode note into Uint8Array
+      const enc = new TextEncoder();
+      const encodedNote = enc.encode(note);
+
+      if (network === 'MainNet') {
+        algodServer = ALGOD_SERVER_MAINNET;
+      } else {
+        algodServer = ALGOD_SERVER_TESTNET;
+      }
+
+      const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, algodServer, ALGOD_PORT);
+      const params = await algodClient.getTransactionParams().do();
+
+      let txn = algosdk.makeAssetCreateTxnWithSuggestedParams(
+        currentUser,
+        encodedNote,
+        totalIssuance,
+        decimals,
+        false,
+        manager || undefined,
+        reserve || undefined,
+        freeze || undefined,
+        clawback || undefined,
+        unitName,
+        assetName,
+        assetUrl || undefined,
+        assetMetadataHash || undefined,
+        params
+      );
+      let txId = txn.txID().toString();
+      console.log('>>>>>>>> txId => ', txId);
+
+      if (walletName === 'MyAlgo') {
+        let signedTxn = await myAlgoWallet.signTransaction(txn.toByte());
+        console.log('>>>>>>>>>> signedTxn => ', signedTxn);
+
+        await algodClient.sendRawTransaction(signedTxn.blob).do();
+      } else if (walletName === 'AlgoSigner') {
+        const txn_b64 = await AlgoSigner.encoding.msgpackToBase64(txn.toByte());
+        console.log('>>>>>>>> txn_b64 => ', txn_b64);
+        const signedTxns = await AlgoSigner.signTxn([{ txn: txn_b64 }]);
+        console.log('>>>>>>>> signedTxns => ', signedTxns);
+        const binarySignedTxn = await AlgoSigner.encoding.base64ToMsgpack(signedTxns[0].blob);
+        console.log('>>>>>>>> binarySignedTxn => ', binarySignedTxn);
+        await algodClient.sendRawTransaction(binarySignedTxn).do();
+      }
+
+      let confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4);
+      console.log('>>>>>>>> confirmedTxn => ', confirmedTxn);
+
+      let txnResponse = await algodClient.pendingTransactionInformation(txId).do();
+      console.log('>>>>>>>>> txnResponse => ', txnResponse);
+      closeLoading();
+      closeDialog();
+      openAlert({
+        severity: SUCCESS,
+        message: `Transaction ${txId} confirmed in round ${txnResponse['confirmed-round']}. The asset id is ${txnResponse['asset-index']}`
+      });
     }
-  })
+  });
 
-  const switchManager = (enabled: boolean) => {
-    setManagerEnabled(enabled)
-    formik.setFieldValue('manager', currentUser)
-  }
+  const switchManager = (enabled) => {
+    setManagerEnabled(enabled);
+    if (!enabled) {
+      formik.setFieldValue('manager', '');
+    }
+  };
 
-  const switchReserve = (enabled: boolean) => {
-    setReserveEnabled(enabled)
-    formik.setFieldValue('reserve', currentUser)
-  }
+  const switchReserve = (enabled) => {
+    setReserveEnabled(enabled);
+    if (!enabled) {
+      formik.setFieldValue('reserve', '');
+    }
+  };
 
-  const switchFreeze = (enabled: boolean) => {
-    setFreezeEnabled(enabled)
-    formik.setFieldValue('freeze', currentUser)
-  }
+  const switchFreeze = (enabled) => {
+    setFreezeEnabled(enabled);
+    if (!enabled) {
+      formik.setFieldValue('freeze', '');
+    }
+  };
 
-  const switchClawback = (enabled: boolean) => {
-    setClawbackEnabled(enabled)
-    formik.setFieldValue('clawback', currentUser)
-  }
+  const switchClawback = (enabled) => {
+    setClawbackEnabled(enabled);
+    if (!enabled) {
+      formik.setFieldValue('clawback', '');
+    }
+  };
 
   return (
     <Dialog open={dialogOpened} onClose={() => closeDialog()} maxWidth="sm" fullWidth>
@@ -319,5 +389,5 @@ export default function DialogCreateAsset({ dialogOpened, setDialogOpened }: IPr
         <Button variant="contained" onClick={() => formik.handleSubmit()}>Create</Button>
       </DialogActions>
     </Dialog >
-  )
+  );
 }
