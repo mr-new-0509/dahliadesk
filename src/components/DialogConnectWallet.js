@@ -9,6 +9,7 @@ import { PeraWalletConnect } from "@perawallet/connect";
 import useAlertMessage from '../hooks/useAlertMessage';
 import { MSG_NO_ACCOUNT, MSG_NO_ALGO_SIGNER, WALLET_ALGO_SIGNER, WALLET_MY_ALGO, WALLET_PERA, WARNING } from '../utils/constants';
 import useConnectWallet from '../hooks/useConnectWallet';
+import { getBalanceOfCurrentUser } from '../utils/functions';
 
 const myAlgoWallet = new MyAlgoConnect();
 
@@ -53,6 +54,7 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
     let accounts = await myAlgoWallet.connect();
     if (accounts.length > 0) {
       connectAct(network, accounts[0].address, WALLET_MY_ALGO);
+      getBalanceOfCurrentUser(accounts[0].address, network);
       closeDialog();
     } else {
       openAlert({

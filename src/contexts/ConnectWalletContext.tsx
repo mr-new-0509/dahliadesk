@@ -1,4 +1,4 @@
-import { createContext, useReducer } from 'react';
+import React, { createContext, useReducer } from 'react';
 import { TNetwork, TWalletName } from '../utils/types';
 
 /* --------------------------------------------------------------- */
@@ -7,6 +7,7 @@ interface IInitialState {
   currentUser: string;
   walletName?: TWalletName;
   network?: TNetwork;
+  balance: number;
 }
 
 interface IAction {
@@ -26,6 +27,7 @@ interface IHandlers {
 
 const initialState: IInitialState = {
   currentUser: '',
+  balance: 0
 };
 
 const handlers: IHandlers = {
@@ -47,6 +49,12 @@ const handlers: IHandlers = {
       walletName: action.payload
     };
   },
+  SET_BALANCE: (state: object, action: IAction) => {
+    return {
+      ...state,
+      balance: action.payload
+    };
+  }
 };
 
 const reducer = (state: object, action: IAction) =>
@@ -90,6 +98,10 @@ function ConnectWalletProvider({ children }: IProps) {
     dispatch({
       type: 'SET_WALLET_NAME',
       payload: undefined
+    })
+    dispatch({
+      type: 'SET_BALANCE',
+      payload: 0
     })
   };
 
