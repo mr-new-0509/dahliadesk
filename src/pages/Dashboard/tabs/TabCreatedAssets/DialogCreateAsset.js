@@ -47,7 +47,6 @@ export default function DialogCreateAsset({ dialogOpened, setDialogOpened }) {
     validationSchema: validSchema,
     onSubmit: async (values) => {
       openLoading();
-      console.log('>>>>>>>>>> values => ', values);
       const { assetName, unitName, totalIssuance, decimals, assetUrl, assetMetadataHash, manager, reserve, freeze, clawback, note } = values;
       let algodServer = '';
 

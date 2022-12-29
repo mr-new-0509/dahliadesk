@@ -1,11 +1,21 @@
+/* global AlgoSigner */
 import React, { useEffect, useMemo, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, TextField, Typography } from '@mui/material';
 import * as yup from 'yup';
 import { useFormik } from "formik";
-import { MSG_REQUIRED } from '../../../../utils/constants';
+import algosdk from 'algosdk';
+import WAValidator from 'multicoin-address-validator';
+import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, ERROR, MSG_REQUIRED, SUCCESS } from '../../../../utils/constants';
+import useConnectWallet from '../../../../hooks/useConnectWallet';
+import useLoading from '../../../../hooks/useLoading';
+import useAlertMessage from '../../../../hooks/useAlertMessage';
 
 export default function DialogSendAssets({ dialogOpened, setDialogOpened, asset }) {
+  const { network, currentUser, walletName, myAlgoWallet } = useConnectWallet();
+  const { openLoading, closeLoading } = useLoading();
+  const { openAlert } = useAlertMessage();
+
   const [validSchema, setValidSchema] = useState(null);
 
   const balanceToView = useMemo(() => {
@@ -37,7 +47,77 @@ export default function DialogSendAssets({ dialogOpened, setDialogOpened, asset 
     validationSchema: validSchema,
     onSubmit: async (values) => {
       console.log('>>>>>> values => ', values);
-      closeDialog();
+      const { recipient, amount, note } = values;
+      let isValidRecipient = WAValidator.validate(recipient, 'algo');
+
+      //  Validate whether the recipient has a valid address
+      if (!isValidRecipient) {
+        formik.setFieldError('recipient', 'Invalid address.');
+        return;
+      } else {
+        try {
+          openLoading();
+          //  Encode note into Uint8Array
+          const enc = new TextEncoder();
+          const encodedNote = enc.encode(note);
+
+          let algodServer = '';
+          if (network === 'MainNet') {
+            algodServer = ALGOD_SERVER_MAINNET;
+          } else {
+            algodServer = ALGOD_SERVER_TESTNET;
+          }
+
+          const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, algodServer, ALGOD_PORT);
+          const params = await algodClient.getTransactionParams().do();
+
+          const txn = algosdk.makeAssetTransferTxnWithSuggestedParams(
+            currentUser,
+            recipient,
+            undefined,
+            undefined,
+            amount,
+            encodedNote,
+            asset['index'],
+            params
+          );
+          const txId = txn.txID().toString();
+
+          if (walletName === 'MyAlgo') {
+            let signedTxn = await myAlgoWallet.signTransaction(txn.toByte());
+            console.log('>>>>>>>>>> signedTxn => ', signedTxn);
+
+            await algodClient.sendRawTransaction(signedTxn.blob).do();
+          } else if (walletName === 'AlgoSigner') {
+            const txn_b64 = await AlgoSigner.encoding.msgpackToBase64(txn.toByte());
+            console.log('>>>>>>>> txn_b64 => ', txn_b64);
+            const signedTxns = await AlgoSigner.signTxn([{ txn: txn_b64 }]);
+            console.log('>>>>>>>> signedTxns => ', signedTxns);
+            const binarySignedTxn = await AlgoSigner.encoding.base64ToMsgpack(signedTxns[0].blob);
+            console.log('>>>>>>>> binarySignedTxn => ', binarySignedTxn);
+            await algodClient.sendRawTransaction(binarySignedTxn).do();
+          }
+
+          let confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4);
+          console.log('>>>>>>>> confirmedTxn => ', confirmedTxn);
+
+          let txnResponse = await algodClient.pendingTransactionInformation(txId).do();
+          console.log('>>>>>>>>> txnResponse => ', txnResponse);
+          closeLoading();
+          closeDialog();
+          openAlert({
+            severity: SUCCESS,
+            message: `Transaction ${txId} confirmed in round ${txnResponse['confirmed-round']}. The asset id is ${txnResponse['asset-index']}`
+          });
+        } catch (error) {
+          console.log('>>>>>>>>> error => ', error.message);
+          openAlert({
+            severity: ERROR,
+            message: error.message
+          })
+          closeLoading();
+        }
+      }
     }
   });
 
