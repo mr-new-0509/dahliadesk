@@ -157,7 +157,6 @@ export default function TabCreatedAssets() {
           />
         </>
       )}
-
     </Box>
   )
 }

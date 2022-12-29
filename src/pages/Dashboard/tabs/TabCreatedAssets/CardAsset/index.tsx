@@ -4,7 +4,7 @@ import { Icon } from '@iconify/react';
 import PopupState, { bindMenu, bindTrigger } from 'material-ui-popup-state';
 import PaperAccount from './PaperAccount';
 import useConnectWallet from '../../../../../hooks/useConnectWallet';
-import { BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_TESTNET_EXPLORER } from '../../../../../utils/constants';
+import { BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_MAINNET_SWAP, BASE_URL_OF_TESTNET_EXPLORER, BASE_URL_OF_TESTNET_SWAP } from '../../../../../utils/constants';
 
 interface IProps {
   assetItem: any;
@@ -40,6 +40,14 @@ export default function CardAsset({
       return BASE_URL_OF_MAINNET_EXPLORER
     } else {
       return BASE_URL_OF_TESTNET_EXPLORER
+    }
+  }, [network])
+
+  const baseUrlOfSwap = useMemo(() => {
+    if (network === 'MainNet') {
+      return BASE_URL_OF_MAINNET_SWAP
+    } else {
+      return BASE_URL_OF_TESTNET_SWAP
     }
   }, [network])
 
@@ -126,7 +134,11 @@ export default function CardAsset({
                       <ListItemIcon><Icon icon="mdi:trash-outline" /></ListItemIcon>
                       <ListItemText>Delete asset</ListItemText>
                     </MenuItem>
-                    <MenuItem>
+                    <MenuItem
+                      component={Link}
+                      href={`${baseUrlOfSwap}${assetItem['index']}`}
+                      target="_blank"
+                    >
                       <ListItemIcon><Icon icon="ic:outline-swap-horizontal-circle" /></ListItemIcon>
                       <ListItemText>Swap (Tinyman)</ListItemText>
                     </MenuItem>
