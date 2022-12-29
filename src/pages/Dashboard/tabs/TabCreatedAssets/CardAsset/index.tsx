@@ -93,7 +93,10 @@ export default function CardAsset({
                       <ListItemIcon><Icon icon="material-symbols:edit-outline-rounded" /></ListItemIcon>
                       <ListItemText>Modify asset</ListItemText>
                     </MenuItem>
-                    <MenuItem>
+                    <MenuItem
+                      onClick={() => handleFreeze(popupState)}
+                      disabled={currentUser !== assetItem['params']['freeze']}
+                    >
                       <ListItemIcon><Icon icon="material-symbols:lock-outline" /></ListItemIcon>
                       <ListItemText>Freeze / Unfreeze</ListItemText>
                     </MenuItem>

@@ -10,6 +10,7 @@ import CardAsset from './CardAsset'
 import useLoading from '../../../../hooks/useLoading'
 import DialogSendAssets from './DialogSendAssets'
 import DialogModifyAsset from './DialogModifyAsset'
+import DialogFreezeAsset from './DialogFreezeAsset'
 
 export default function TabCreatedAssets() {
   const { network, currentUser, setBalanceAct } = useConnectWallet()
@@ -119,6 +120,11 @@ export default function TabCreatedAssets() {
           <DialogModifyAsset
             dialogOpened={dialogModifyAssetOpened}
             setDialogOpened={setDialogModifyAssetOpened}
+            asset={selectedAsset}
+          />
+          <DialogFreezeAsset
+            dialogOpened={dialogFreezeOpened}
+            setDialogOpened={setDialogFreezeOpened}
             asset={selectedAsset}
           />
         </>

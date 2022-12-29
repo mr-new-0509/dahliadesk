@@ -3,10 +3,10 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, FormControlLabel, Grid, Icon, IconButton, Stack, Switch, TextField, Tooltip, Typography, Icon as MuiIcon, DialogActions, Button } from '@mui/material';
 import { useFormik } from "formik";
 import WAValidator from 'multicoin-address-validator';
+import algosdk from 'algosdk';
 import useConnectWallet from '../../../../hooks/useConnectWallet';
 import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, ERROR, MSG_INVAILD_ADDRESS, SUCCESS } from '../../../../utils/constants';
 import useLoading from '../../../../hooks/useLoading';
-import algosdk from 'algosdk';
 import useAlertMessage from '../../../../hooks/useAlertMessage';
 
 export default function DialogModifyAsset({ dialogOpened, setDialogOpened, asset }) {
