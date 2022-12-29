@@ -6,7 +6,7 @@ import * as yup from 'yup';
 import { useFormik } from "formik";
 import algosdk from 'algosdk';
 import WAValidator from 'multicoin-address-validator';
-import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, ERROR, MSG_REQUIRED, SUCCESS } from '../../../../utils/constants';
+import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, ERROR, MSG_INVAILD_ADDRESS, MSG_REQUIRED, SUCCESS } from '../../../../utils/constants';
 import useConnectWallet from '../../../../hooks/useConnectWallet';
 import useLoading from '../../../../hooks/useLoading';
 import useAlertMessage from '../../../../hooks/useAlertMessage';
@@ -25,7 +25,7 @@ export default function DialogSendAssets({ dialogOpened, setDialogOpened, asset 
   useEffect(() => {
     const schema = yup.object().shape({
       recipient: yup.string().required(MSG_REQUIRED),
-      amount: yup.number().min(0.001, 'Minimum amount is 0.001.').max(balanceToView, `Maximum amount is ${balanceToView}`).required(MSG_REQUIRED),
+      amount: yup.number().min(1, 'Minimum amount is 1.').max(balanceToView, `Maximum amount is ${balanceToView}`).required(MSG_REQUIRED),
     });
     setValidSchema(schema);
   }, [balanceToView]);
@@ -41,18 +41,18 @@ export default function DialogSendAssets({ dialogOpened, setDialogOpened, asset 
   const formik = useFormik({
     initialValues: {
       recipient: '',
-      amount: 0.001,
+      amount: 1,
       note: ''
     },
     validationSchema: validSchema,
     onSubmit: async (values) => {
       console.log('>>>>>> values => ', values);
       const { recipient, amount, note } = values;
-      let isValidRecipient = WAValidator.validate(recipient, 'algo');
+      const isValidRecipient = WAValidator.validate(recipient, 'algo');
 
       //  Validate whether the recipient has a valid address
       if (!isValidRecipient) {
-        formik.setFieldError('recipient', 'Invalid address.');
+        formik.setFieldError('recipient', MSG_INVAILD_ADDRESS);
         return;
       } else {
         try {
@@ -103,6 +103,12 @@ export default function DialogSendAssets({ dialogOpened, setDialogOpened, asset 
 
           let txnResponse = await algodClient.pendingTransactionInformation(txId).do();
           console.log('>>>>>>>>> txnResponse => ', txnResponse);
+          formik.setTouched(false);
+          formik.setValues({
+            recipient: '',
+            amount: 1,
+            note: ''
+          });
           closeLoading();
           closeDialog();
           openAlert({
@@ -114,7 +120,7 @@ export default function DialogSendAssets({ dialogOpened, setDialogOpened, asset 
           openAlert({
             severity: ERROR,
             message: error.message
-          })
+          });
           closeLoading();
         }
       }

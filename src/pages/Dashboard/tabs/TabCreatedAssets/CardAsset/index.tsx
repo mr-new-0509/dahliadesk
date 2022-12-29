@@ -29,7 +29,7 @@ export default function CardAsset({
   setDialogDeployOpened,
   setDialogBurnSupplyOpened
 }: IProps) {
-  const { network } = useConnectWallet()
+  const { network, currentUser } = useConnectWallet()
 
   const balanceToView = useMemo(() => {
     return assetItem['params']['total'] / 10 ** assetItem['params']['decimals']
@@ -46,6 +46,18 @@ export default function CardAsset({
   const handleSendAssets = (popupState: any) => {
     setSelectedAsset(assetItem)
     setDialogSendAssetsOpened(true)
+    popupState.close()
+  }
+
+  const handleModifyAsset = (popupState: any) => {
+    setSelectedAsset(assetItem)
+    setDialogModifyAssetOpened(true)
+    popupState.close()
+  }
+
+  const handleFreeze = (popupState: any) => {
+    setSelectedAsset(assetItem)
+    setDialogFreezeOpened(true)
     popupState.close()
   }
 
@@ -74,7 +86,10 @@ export default function CardAsset({
                       <ListItemIcon><Icon icon="ic:outline-send" /></ListItemIcon>
                       <ListItemText>Send assets</ListItemText>
                     </MenuItem>
-                    <MenuItem>
+                    <MenuItem
+                      onClick={() => handleModifyAsset(popupState)}
+                      disabled={currentUser !== assetItem['params']['manager']}
+                    >
                       <ListItemIcon><Icon icon="material-symbols:edit-outline-rounded" /></ListItemIcon>
                       <ListItemText>Modify asset</ListItemText>
                     </MenuItem>

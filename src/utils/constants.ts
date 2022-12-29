@@ -11,6 +11,7 @@ export const MSG_NO_ALGO_SIGNER =
 export const MSG_NO_ACCOUNT =
   "You have no account in your wallet, Please create one.";
 export const MSG_REQUIRED = "Required.";
+export const MSG_INVAILD_ADDRESS = "Invalid address.";
 
 export const WALLET_ALGO_SIGNER = "AlgoSigner";
 export const WALLET_MY_ALGO = "MyAlgo";
@@ -23,6 +24,5 @@ export const ALGOD_PORT = 443;
 
 export const DEFAULT_DECIMALS = 6;
 
-export const BASE_URL_OF_TESTNET_EXPLORER =
-  "https://testnet.algoexplorer.io";
+export const BASE_URL_OF_TESTNET_EXPLORER = "https://testnet.algoexplorer.io";
 export const BASE_URL_OF_MAINNET_EXPLORER = "https://algoexplorer.io";

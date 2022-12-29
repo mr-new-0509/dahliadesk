@@ -9,6 +9,7 @@ import useConnectWallet from '../../../../hooks/useConnectWallet'
 import CardAsset from './CardAsset'
 import useLoading from '../../../../hooks/useLoading'
 import DialogSendAssets from './DialogSendAssets'
+import DialogModifyAsset from './DialogModifyAsset'
 
 export default function TabCreatedAssets() {
   const { network, currentUser, setBalanceAct } = useConnectWallet()
@@ -113,6 +114,11 @@ export default function TabCreatedAssets() {
           <DialogSendAssets
             dialogOpened={dialogSendAssetsOpened}
             setDialogOpened={setDialogSendAssetsOpened}
+            asset={selectedAsset}
+          />
+          <DialogModifyAsset
+            dialogOpened={dialogModifyAssetOpened}
+            setDialogOpened={setDialogModifyAssetOpened}
             asset={selectedAsset}
           />
         </>
