@@ -13,7 +13,7 @@ interface IProps {
   setDialogModifyAssetOpened: Function;
   setDialogFreezeOpened: Function;
   setDialogRevokeAssetsOpened: Function;
-  setDialogAssetOpened: Function;
+  setDialogDeleteAssetOpened: Function;
   setDialogDeployOpened: Function;
   setDialogBurnSupplyOpened: Function;
 }
@@ -25,7 +25,7 @@ export default function CardAsset({
   setDialogModifyAssetOpened,
   setDialogFreezeOpened,
   setDialogRevokeAssetsOpened,
-  setDialogAssetOpened,
+  setDialogDeleteAssetOpened,
   setDialogDeployOpened,
   setDialogBurnSupplyOpened
 }: IProps) {
@@ -64,6 +64,12 @@ export default function CardAsset({
   const handleRevoke = (popupState: any) => {
     setSelectedAsset(assetItem)
     setDialogRevokeAssetsOpened(true)
+    popupState.close()
+  }
+
+  const handleDelete = (popupState: any) => {
+    setSelectedAsset(assetItem)
+    setDialogDeleteAssetOpened(true)
     popupState.close()
   }
 
@@ -113,7 +119,10 @@ export default function CardAsset({
                       <ListItemIcon><Icon icon="mdi:reload" /></ListItemIcon>
                       <ListItemText>Revoke assets</ListItemText>
                     </MenuItem>
-                    <MenuItem>
+                    <MenuItem
+                      onClick={() => handleDelete(popupState)}
+                      disabled={currentUser !== assetItem['params']['manager']}
+                    >
                       <ListItemIcon><Icon icon="mdi:trash-outline" /></ListItemIcon>
                       <ListItemText>Delete asset</ListItemText>
                     </MenuItem>

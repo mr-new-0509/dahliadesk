@@ -107,7 +107,7 @@ export default function DialogRevokeAsset({ dialogOpened, setDialogOpened, asset
         });
         setDesireReload(true);
       } catch (error) {
-        console.log('>>>>>>>>> error of DialogModifyAsset => ', error.message);
+        console.log('>>>>>>>>> error of DialogRevokeAsset => ', error.message);
         openAlert({
           severity: ERROR,
           message: error.message

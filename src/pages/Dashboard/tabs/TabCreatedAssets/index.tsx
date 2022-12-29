@@ -12,6 +12,7 @@ import DialogSendAssets from './DialogSendAssets'
 import DialogModifyAsset from './DialogModifyAsset'
 import DialogFreezeAsset from './DialogFreezeAsset'
 import DialogRevokeAsset from './DialogRevokeAsset'
+import DialogDeleteAsset from './DialogDeleteAsset'
 
 export default function TabCreatedAssets() {
   const { network, currentUser, setBalanceAct } = useConnectWallet()
@@ -25,7 +26,7 @@ export default function TabCreatedAssets() {
   const [dialogModifyAssetOpened, setDialogModifyAssetOpened] = useState<boolean>(false)
   const [dialogFreezeOpened, setDialogFreezeOpened] = useState<boolean>(false)
   const [dialogRevokeAssetsOpened, setDialogRevokeAssetsOpened] = useState<boolean>(false)
-  const [dialogDeleteAssetOpened, setDialogAssetOpened] = useState<boolean>(false)
+  const [dialogDeleteAssetOpened, setDialogDeleteAssetOpened] = useState<boolean>(false)
   const [dialogDeployOpened, setDialogDeployOpened] = useState<boolean>(false)
   const [dialogBurnSupplyOpened, setDialogBurnSupplyOpened] = useState<boolean>(false)
   const [desireReload, setDesireReload] = useState<boolean>(false)
@@ -104,7 +105,7 @@ export default function TabCreatedAssets() {
                       setDialogModifyAssetOpened={setDialogModifyAssetOpened}
                       setDialogFreezeOpened={setDialogFreezeOpened}
                       setDialogRevokeAssetsOpened={setDialogRevokeAssetsOpened}
-                      setDialogAssetOpened={setDialogAssetOpened}
+                      setDialogDeleteAssetOpened={setDialogDeleteAssetOpened}
                       setDialogDeployOpened={setDialogDeployOpened}
                       setDialogBurnSupplyOpened={setDialogBurnSupplyOpened}
                     />
@@ -145,6 +146,12 @@ export default function TabCreatedAssets() {
           <DialogRevokeAsset
             dialogOpened={dialogRevokeAssetsOpened}
             setDialogOpened={setDialogRevokeAssetsOpened}
+            asset={selectedAsset}
+            setDesireReload={setDesireReload}
+          />
+          <DialogDeleteAsset
+            dialogOpened={dialogDeleteAssetOpened}
+            setDialogOpened={setDialogDeleteAssetOpened}
             asset={selectedAsset}
             setDesireReload={setDesireReload}
           />
