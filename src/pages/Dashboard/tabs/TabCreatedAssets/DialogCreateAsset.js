@@ -6,7 +6,7 @@ import * as yup from 'yup';
 import { useFormik } from "formik";
 import algosdk from 'algosdk';
 import WAValidator from 'multicoin-address-validator';
-import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, MSG_INVAILD_ADDRESS, MSG_REQUIRED, SUCCESS } from '../../../../utils/constants';
+import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, ERROR, MSG_INVAILD_ADDRESS, MSG_REQUIRED, SUCCESS } from '../../../../utils/constants';
 import useConnectWallet from '../../../../hooks/useConnectWallet';
 import useLoading from '../../../../hooks/useLoading';
 import useAlertMessage from '../../../../hooks/useAlertMessage';
@@ -17,7 +17,7 @@ const validSchema = yup.object().shape({
   totalIssuance: yup.number().min(1, 'Minimum value is 1.').required(MSG_REQUIRED),
 });
 
-export default function DialogCreateAsset({ dialogOpened, setDialogOpened }) {
+export default function DialogCreateAsset({ dialogOpened, setDialogOpened, setDesireReload }) {
   const { currentUser, network, myAlgoWallet, walletName } = useConnectWallet();
   const { openLoading, closeLoading } = useLoading();
   const { openAlert } = useAlertMessage();
@@ -74,67 +74,77 @@ export default function DialogCreateAsset({ dialogOpened, setDialogOpened }) {
         return;
       }
 
-      openLoading();
+      try {
+        openLoading();
 
-      let algodServer = '';
-      if (network === 'MainNet') {
-        algodServer = ALGOD_SERVER_MAINNET;
-      } else {
-        algodServer = ALGOD_SERVER_TESTNET;
+        let algodServer = '';
+        if (network === 'MainNet') {
+          algodServer = ALGOD_SERVER_MAINNET;
+        } else {
+          algodServer = ALGOD_SERVER_TESTNET;
+        }
+
+        const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, algodServer, ALGOD_PORT);
+        const params = await algodClient.getTransactionParams().do();
+
+        //  Encode note into Uint8Array
+        const enc = new TextEncoder();
+        const encodedNote = enc.encode(note);
+
+        const txn = algosdk.makeAssetCreateTxnWithSuggestedParams(
+          currentUser,
+          encodedNote,
+          totalIssuance,
+          decimals,
+          false,
+          manager || undefined,
+          reserve || undefined,
+          freeze || undefined,
+          clawback || undefined,
+          unitName,
+          assetName,
+          assetUrl || undefined,
+          assetMetadataHash || undefined,
+          params
+        );
+        const txId = txn.txID().toString();
+        console.log('>>>>>>>> txId => ', txId);
+
+        if (walletName === 'MyAlgo') {
+          const signedTxn = await myAlgoWallet.signTransaction(txn.toByte());
+          console.log('>>>>>>>>>> signedTxn => ', signedTxn);
+
+          await algodClient.sendRawTransaction(signedTxn.blob).do();
+        } else if (walletName === 'AlgoSigner') {
+          const txn_b64 = await AlgoSigner.encoding.msgpackToBase64(txn.toByte());
+          console.log('>>>>>>>> txn_b64 => ', txn_b64);
+          const signedTxns = await AlgoSigner.signTxn([{ txn: txn_b64 }]);
+          console.log('>>>>>>>> signedTxns => ', signedTxns);
+          const binarySignedTxn = await AlgoSigner.encoding.base64ToMsgpack(signedTxns[0].blob);
+          console.log('>>>>>>>> binarySignedTxn => ', binarySignedTxn);
+          await algodClient.sendRawTransaction(binarySignedTxn).do();
+        }
+
+        const confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4);
+        console.log('>>>>>>>> confirmedTxn => ', confirmedTxn);
+
+        const txnResponse = await algodClient.pendingTransactionInformation(txId).do();
+        console.log('>>>>>>>>> txnResponse => ', txnResponse);
+        closeLoading();
+        closeDialog();
+        openAlert({
+          severity: SUCCESS,
+          message: `Transaction ${txId} confirmed in round ${txnResponse['confirmed-round']}. The asset id is ${txnResponse['asset-index']}`
+        });
+        setDesireReload(true);
+      } catch (error) {
+        console.log('>>>>>>>>> error of DialogCreateAsset => ', error.message);
+        openAlert({
+          severity: ERROR,
+          message: error.message
+        });
+        closeLoading();
       }
-
-      const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, algodServer, ALGOD_PORT);
-      const params = await algodClient.getTransactionParams().do();
-
-      //  Encode note into Uint8Array
-      const enc = new TextEncoder();
-      const encodedNote = enc.encode(note);
-
-      const txn = algosdk.makeAssetCreateTxnWithSuggestedParams(
-        currentUser,
-        encodedNote,
-        totalIssuance,
-        decimals,
-        false,
-        manager || undefined,
-        reserve || undefined,
-        freeze || undefined,
-        clawback || undefined,
-        unitName,
-        assetName,
-        assetUrl || undefined,
-        assetMetadataHash || undefined,
-        params
-      );
-      const txId = txn.txID().toString();
-      console.log('>>>>>>>> txId => ', txId);
-
-      if (walletName === 'MyAlgo') {
-        const signedTxn = await myAlgoWallet.signTransaction(txn.toByte());
-        console.log('>>>>>>>>>> signedTxn => ', signedTxn);
-
-        await algodClient.sendRawTransaction(signedTxn.blob).do();
-      } else if (walletName === 'AlgoSigner') {
-        const txn_b64 = await AlgoSigner.encoding.msgpackToBase64(txn.toByte());
-        console.log('>>>>>>>> txn_b64 => ', txn_b64);
-        const signedTxns = await AlgoSigner.signTxn([{ txn: txn_b64 }]);
-        console.log('>>>>>>>> signedTxns => ', signedTxns);
-        const binarySignedTxn = await AlgoSigner.encoding.base64ToMsgpack(signedTxns[0].blob);
-        console.log('>>>>>>>> binarySignedTxn => ', binarySignedTxn);
-        await algodClient.sendRawTransaction(binarySignedTxn).do();
-      }
-
-      const confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4);
-      console.log('>>>>>>>> confirmedTxn => ', confirmedTxn);
-
-      const txnResponse = await algodClient.pendingTransactionInformation(txId).do();
-      console.log('>>>>>>>>> txnResponse => ', txnResponse);
-      closeLoading();
-      closeDialog();
-      openAlert({
-        severity: SUCCESS,
-        message: `Transaction ${txId} confirmed in round ${txnResponse['confirmed-round']}. The asset id is ${txnResponse['asset-index']}`
-      });
     }
   });
 

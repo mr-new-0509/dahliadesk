@@ -61,6 +61,12 @@ export default function CardAsset({
     popupState.close()
   }
 
+  const handleRevoke = (popupState: any) => {
+    setSelectedAsset(assetItem)
+    setDialogRevokeAssetsOpened(true)
+    popupState.close()
+  }
+
   return (
     <Card>
       <CardHeader
@@ -100,7 +106,10 @@ export default function CardAsset({
                       <ListItemIcon><Icon icon="material-symbols:lock-outline" /></ListItemIcon>
                       <ListItemText>Freeze / Unfreeze</ListItemText>
                     </MenuItem>
-                    <MenuItem>
+                    <MenuItem
+                      onClick={() => handleRevoke(popupState)}
+                      disabled={currentUser !== assetItem['params']['clawback']}
+                    >
                       <ListItemIcon><Icon icon="mdi:reload" /></ListItemIcon>
                       <ListItemText>Revoke assets</ListItemText>
                     </MenuItem>

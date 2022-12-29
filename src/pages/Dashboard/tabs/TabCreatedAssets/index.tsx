@@ -11,6 +11,7 @@ import useLoading from '../../../../hooks/useLoading'
 import DialogSendAssets from './DialogSendAssets'
 import DialogModifyAsset from './DialogModifyAsset'
 import DialogFreezeAsset from './DialogFreezeAsset'
+import DialogRevokeAsset from './DialogRevokeAsset'
 
 export default function TabCreatedAssets() {
   const { network, currentUser, setBalanceAct } = useConnectWallet()
@@ -27,8 +28,20 @@ export default function TabCreatedAssets() {
   const [dialogDeleteAssetOpened, setDialogAssetOpened] = useState<boolean>(false)
   const [dialogDeployOpened, setDialogDeployOpened] = useState<boolean>(false)
   const [dialogBurnSupplyOpened, setDialogBurnSupplyOpened] = useState<boolean>(false)
+  const [desireReload, setDesireReload] = useState<boolean>(false)
 
   useEffect(() => {
+    getAssets()
+  }, [network])
+
+  useEffect(() => {
+    if (desireReload) {
+      getAssets()
+      setDesireReload(false)
+    }
+  }, [desireReload])
+
+  const getAssets = async () => {
     openLoading()
     let algodServer = ''
     if (network === 'MainNet') {
@@ -38,14 +51,12 @@ export default function TabCreatedAssets() {
     }
     const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, algodServer, ALGOD_PORT);
 
-    (async () => {
-      const accountInfo = await algodClient.accountInformation(currentUser).do();
-      console.log('>>>>>>>> accountInfo => ', accountInfo)
-      setBalanceAct(accountInfo.amount)
-      setCreatedAssets(accountInfo['created-assets'])
-      closeLoading()
-    })()
-  }, [network])
+    const accountInfo = await algodClient.accountInformation(currentUser).do();
+    console.log('>>>>>>>> accountInfo => ', accountInfo)
+    setBalanceAct(accountInfo.amount)
+    setCreatedAssets(accountInfo['created-assets'])
+    closeLoading()
+  }
 
   const handleCheck = () => {
     setHideZeroBalance(!hideZeroBalance)
@@ -109,6 +120,7 @@ export default function TabCreatedAssets() {
       <DialogCreateAsset
         dialogOpened={dialogOpened}
         setDialogOpened={setDialogOpened}
+        setDesireReload={setDesireReload}
       />
       {selectedAsset && (
         <>
@@ -116,16 +128,25 @@ export default function TabCreatedAssets() {
             dialogOpened={dialogSendAssetsOpened}
             setDialogOpened={setDialogSendAssetsOpened}
             asset={selectedAsset}
+            setDesireReload={setDesireReload}
           />
           <DialogModifyAsset
             dialogOpened={dialogModifyAssetOpened}
             setDialogOpened={setDialogModifyAssetOpened}
             asset={selectedAsset}
+            setDesireReload={setDesireReload}
           />
           <DialogFreezeAsset
             dialogOpened={dialogFreezeOpened}
             setDialogOpened={setDialogFreezeOpened}
             asset={selectedAsset}
+            setDesireReload={setDesireReload}
+          />
+          <DialogRevokeAsset
+            dialogOpened={dialogRevokeAssetsOpened}
+            setDialogOpened={setDialogRevokeAssetsOpened}
+            asset={selectedAsset}
+            setDesireReload={setDesireReload}
           />
         </>
       )}

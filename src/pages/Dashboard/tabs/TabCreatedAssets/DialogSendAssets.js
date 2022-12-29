@@ -11,7 +11,7 @@ import useConnectWallet from '../../../../hooks/useConnectWallet';
 import useLoading from '../../../../hooks/useLoading';
 import useAlertMessage from '../../../../hooks/useAlertMessage';
 
-export default function DialogSendAssets({ dialogOpened, setDialogOpened, asset }) {
+export default function DialogSendAssets({ dialogOpened, setDialogOpened, asset, setDesireReload }) {
   const { network, currentUser, walletName, myAlgoWallet } = useConnectWallet();
   const { openLoading, closeLoading } = useLoading();
   const { openAlert } = useAlertMessage();
@@ -76,7 +76,7 @@ export default function DialogSendAssets({ dialogOpened, setDialogOpened, asset 
             recipient,
             undefined,
             undefined,
-            amount,
+            amount * 10 ** asset['params']['decimals'],
             encodedNote,
             asset['index'],
             params
@@ -115,6 +115,7 @@ export default function DialogSendAssets({ dialogOpened, setDialogOpened, asset 
             severity: SUCCESS,
             message: `Transaction ${txId} confirmed in round ${txnResponse['confirmed-round']}. The asset id is ${txnResponse['asset-index']}`
           });
+          setDesireReload(true)
         } catch (error) {
           console.log('>>>>>>>>> error => ', error.message);
           openAlert({

@@ -1,59 +1,51 @@
 /* global AlgoSigner */
-
-import React, { useMemo, useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Icon, IconButton, Radio, RadioGroup, Stack, TextField, Typography } from '@mui/material';
-import * as yup from 'yup';
+import React from 'react';
+import { Dialog, DialogContent, DialogTitle, Icon, IconButton, Stack, TextField, Typography, DialogActions, Button } from '@mui/material';
 import { useFormik } from "formik";
 import WAValidator from 'multicoin-address-validator';
+import algosdk from 'algosdk';
+import * as yup from 'yup';
+import useConnectWallet from '../../../../hooks/useConnectWallet';
 import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, ERROR, MSG_INVAILD_ADDRESS, MSG_REQUIRED, SUCCESS } from '../../../../utils/constants';
 import useLoading from '../../../../hooks/useLoading';
 import useAlertMessage from '../../../../hooks/useAlertMessage';
-import useConnectWallet from '../../../../hooks/useConnectWallet';
-import algosdk from 'algosdk';
 
 const validSchema = yup.object().shape({
-  freezeTarget: yup.string().required(MSG_REQUIRED),
+  revocationTarget: yup.string().required(MSG_REQUIRED),
+  recipient: yup.string().required(MSG_REQUIRED),
+  amount: yup.number().min(1, 'Minimum value is 1.').required(MSG_REQUIRED),
 });
 
-export default function DialogFreezeAsset({ dialogOpened, setDialogOpened, asset, setDesireReload }) {
+export default function DialogRevokeAsset({ dialogOpened, setDialogOpened, asset, setDesireReload }) {
+  const { currentUser, network, myAlgoWallet, walletName } = useConnectWallet();
   const { openLoading, closeLoading } = useLoading();
   const { openAlert } = useAlertMessage();
-  const { network, currentUser, walletName, myAlgoWallet } = useConnectWallet();
-
-  const [freezeState, setFreezeState] = useState(true);
-
-  const textOfSubmitButton = useMemo(() => {
-    if (freezeState) {
-      return 'Freeze';
-    } else {
-      return 'Unfreeze';
-    }
-  }, [freezeState]);
 
   const closeDialog = () => {
     setDialogOpened(false);
   };
 
-  const handleRadio = (value) => {
-    if (value === 'true') {
-      setFreezeState(true);
-    } else {
-      setFreezeState(false);
-    }
-  };
-
   const formik = useFormik({
     initialValues: {
-      freezeTarget: '',
+      revocationTarget: '',
+      recipient: '',
+      amount: 1,
       note: ''
     },
     validationSchema: validSchema,
     onSubmit: async (values) => {
-      const { freezeTarget, note } = values;
-      const isValidAddress = WAValidator.validate(freezeTarget, 'algo');
+      const { revocationTarget, recipient, amount, note } = values;
 
-      if (!isValidAddress) {
-        formik.setFieldError('freezeTarget', MSG_INVAILD_ADDRESS);
+      const isValidRevocationTarget = WAValidator.validate(revocationTarget, 'algo');
+      const isValidRecipient = WAValidator.validate(recipient, 'algo');
+
+      if (!isValidRevocationTarget) {
+        formik.setFieldError('revocationTarget', MSG_INVAILD_ADDRESS);
+        return;
+      }
+
+      if (!isValidRecipient) {
+        formik.setFieldError('recipient', MSG_INVAILD_ADDRESS);
         return;
       }
 
@@ -74,14 +66,14 @@ export default function DialogFreezeAsset({ dialogOpened, setDialogOpened, asset
         const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, algodServer, ALGOD_PORT);
         const params = await algodClient.getTransactionParams().do();
 
-        console.log('>>>>>>>> freezeState => ', freezeState);
-
-        const txn = algosdk.makeAssetFreezeTxnWithSuggestedParams(
+        const txn = algosdk.makeAssetTransferTxnWithSuggestedParams(
           currentUser,
+          recipient,
+          undefined,
+          revocationTarget,
+          amount * 10 ** asset['params']['decimals'],
           encodedNote,
           asset['index'],
-          freezeTarget,
-          freezeState,
           params
         );
 
@@ -115,22 +107,21 @@ export default function DialogFreezeAsset({ dialogOpened, setDialogOpened, asset
         });
         setDesireReload(true);
       } catch (error) {
-        console.log('>>>>>>>>> error of DialogFreezeAsset => ', error.message);
+        console.log('>>>>>>>>> error of DialogModifyAsset => ', error.message);
         openAlert({
           severity: ERROR,
           message: error.message
         });
         closeLoading();
       }
-
     }
   });
 
   return (
     <Dialog open={dialogOpened} onClose={() => closeDialog()} maxWidth="sm" fullWidth>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" pr={2} pt={2}>
-        <DialogTitle component={Typography} fontWeight={700}>
-          Freeze/Unfreeze asset
+      <Stack direction="row" justifyContent="space-between" alignItems="center" pr={2} py={2}>
+        <DialogTitle fontWeight={700}>
+          Revoke Assets
         </DialogTitle>
         <IconButton onClick={() => closeDialog()}>
           <Icon icon="material-symbols:close-rounded" />
@@ -145,20 +136,38 @@ export default function DialogFreezeAsset({ dialogOpened, setDialogOpened, asset
       </Typography>
 
       <DialogContent>
-        <Stack spacing={2} alignItems="center">
-          <RadioGroup row value={freezeState} onChange={(e) => handleRadio(e.target.value)}>
-            <FormControlLabel value={true} control={<Radio />} label="Freeze" />
-            <FormControlLabel value={false} control={<Radio />} label="Unfreeze" />
-          </RadioGroup>
+        <Stack spacing={2}>
+          <TextField
+            name="revocationTarget"
+            label="Target address *"
+            value={formik.values.revocationTarget}
+            onChange={formik.handleChange}
+            error={formik.touched.revocationTarget && Boolean(formik.errors.revocationTarget)}
+            helperText={formik.touched.revocationTarget && formik.errors.revocationTarget}
+            multiline
+            fullWidth
+          />
 
           <TextField
-            name="freezeTarget"
-            label="Address *"
-            multiline
-            value={formik.values.freezeTarget}
+            name="recipient"
+            label="Receiver address *"
+            value={formik.values.recipient}
             onChange={formik.handleChange}
-            error={formik.touched.freezeTarget && Boolean(formik.errors.freezeTarget)}
-            helperText={formik.touched.freezeTarget && formik.errors.freezeTarget}
+            error={formik.touched.recipient && Boolean(formik.errors.recipient)}
+            helperText={formik.touched.recipient && formik.errors.recipient}
+            multiline
+            fullWidth
+          />
+
+          <TextField
+            type="number"
+            label="Amount *"
+            name="amount"
+            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+            value={formik.values.amount}
+            onChange={formik.handleChange}
+            error={formik.touched.amount && Boolean(formik.errors.amount)}
+            helperText={formik.touched.amount && formik.errors.amount}
             fullWidth
           />
 
@@ -175,7 +184,7 @@ export default function DialogFreezeAsset({ dialogOpened, setDialogOpened, asset
       </DialogContent>
 
       <DialogActions>
-        <Button variant="contained" onClick={() => formik.handleSubmit()}>{textOfSubmitButton}</Button>
+        <Button variant="contained" onClick={() => formik.handleSubmit()}>Revoke</Button>
       </DialogActions>
     </Dialog>
   );
