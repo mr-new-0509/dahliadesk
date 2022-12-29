@@ -26,8 +26,10 @@ export const DEFAULT_DECIMALS = 6;
 
 export const BASE_URL_OF_TESTNET_EXPLORER = "https://testnet.algoexplorer.io";
 export const BASE_URL_OF_MAINNET_EXPLORER = "https://algoexplorer.io";
-
 export const BASE_URL_OF_TESTNET_SWAP =
   "https://testnet.tinyman.org/#/swap?asset_in=0&asset_out=";
 export const BASE_URL_OF_MAINNET_SWAP =
   "https://tinyman.org/#/swap?asset_in=0&asset_out=";
+
+export const BURNER_VAULT_ADDRESS =
+  "7RFLMPOWFSZVTSCDTRPXXFSL224LBXJBMCWKIGOIXP6CRWDBWZ33TMB3OQ";

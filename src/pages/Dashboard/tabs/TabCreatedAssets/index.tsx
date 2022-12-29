@@ -13,6 +13,7 @@ import DialogModifyAsset from './DialogModifyAsset'
 import DialogFreezeAsset from './DialogFreezeAsset'
 import DialogRevokeAsset from './DialogRevokeAsset'
 import DialogDeleteAsset from './DialogDeleteAsset'
+import DialogBurnAsset from './DialogBurnAsset'
 
 export default function TabCreatedAssets() {
   const { network, currentUser, setBalanceAct } = useConnectWallet()
@@ -28,7 +29,7 @@ export default function TabCreatedAssets() {
   const [dialogRevokeAssetsOpened, setDialogRevokeAssetsOpened] = useState<boolean>(false)
   const [dialogDeleteAssetOpened, setDialogDeleteAssetOpened] = useState<boolean>(false)
   const [dialogDeployOpened, setDialogDeployOpened] = useState<boolean>(false)
-  const [dialogBurnSupplyOpened, setDialogBurnSupplyOpened] = useState<boolean>(false)
+  const [dialogBurnAssetOpened, setDialogBurnAssetOpened] = useState<boolean>(false)
   const [desireReload, setDesireReload] = useState<boolean>(false)
 
   useEffect(() => {
@@ -107,7 +108,7 @@ export default function TabCreatedAssets() {
                       setDialogRevokeAssetsOpened={setDialogRevokeAssetsOpened}
                       setDialogDeleteAssetOpened={setDialogDeleteAssetOpened}
                       setDialogDeployOpened={setDialogDeployOpened}
-                      setDialogBurnSupplyOpened={setDialogBurnSupplyOpened}
+                      setDialogBurnAssetOpened={setDialogBurnAssetOpened}
                     />
                   </Grid>
                 ))
@@ -152,6 +153,12 @@ export default function TabCreatedAssets() {
           <DialogDeleteAsset
             dialogOpened={dialogDeleteAssetOpened}
             setDialogOpened={setDialogDeleteAssetOpened}
+            asset={selectedAsset}
+            setDesireReload={setDesireReload}
+          />
+          <DialogBurnAsset
+            dialogOpened={dialogBurnAssetOpened}
+            setDialogOpened={setDialogBurnAssetOpened}
             asset={selectedAsset}
             setDesireReload={setDesireReload}
           />

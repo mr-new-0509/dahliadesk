@@ -15,7 +15,7 @@ interface IProps {
   setDialogRevokeAssetsOpened: Function;
   setDialogDeleteAssetOpened: Function;
   setDialogDeployOpened: Function;
-  setDialogBurnSupplyOpened: Function;
+  setDialogBurnAssetOpened: Function;
 }
 
 export default function CardAsset({
@@ -27,7 +27,7 @@ export default function CardAsset({
   setDialogRevokeAssetsOpened,
   setDialogDeleteAssetOpened,
   setDialogDeployOpened,
-  setDialogBurnSupplyOpened
+  setDialogBurnAssetOpened
 }: IProps) {
   const { network, currentUser } = useConnectWallet()
 
@@ -78,6 +78,12 @@ export default function CardAsset({
   const handleDelete = (popupState: any) => {
     setSelectedAsset(assetItem)
     setDialogDeleteAssetOpened(true)
+    popupState.close()
+  }
+
+  const handleBurn = (popupState: any) => {
+    setSelectedAsset(assetItem)
+    setDialogBurnAssetOpened(true)
     popupState.close()
   }
 
@@ -142,7 +148,7 @@ export default function CardAsset({
                       <ListItemIcon><Icon icon="ic:outline-swap-horizontal-circle" /></ListItemIcon>
                       <ListItemText>Swap (Tinyman)</ListItemText>
                     </MenuItem>
-                    <MenuItem>
+                    <MenuItem onClick={() => handleBurn(popupState)}>
                       <ListItemIcon><Icon icon="cil:burn" /></ListItemIcon>
                       <ListItemText>Burn supply</ListItemText>
                     </MenuItem>
