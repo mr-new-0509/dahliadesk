@@ -1,10 +1,17 @@
 /* global AlgoSigner */
+
 import React, { useMemo, useState } from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, IconButton, Radio, RadioGroup, Stack, TextField, Typography } from '@mui/material';
 import { Icon } from '@iconify/react';
 import * as yup from 'yup';
 import { useFormik } from 'formik';
-import { MSG_REQUIRED } from '../../../../utils/constants';
+import algosdk from 'algosdk';
+import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, BASE_URL_OF_IPFS, ERROR, MSG_REQUIRED, SUCCESS } from '../../../../utils/constants';
+import { showFirstLetters } from '../../../../utils/functions';
+import api from '../../../../utils/api';
+import useConnectWallet from '../../../../hooks/useConnectWallet';
+import useLoading from '../../../../hooks/useLoading';
+import useAlertMessage from '../../../../hooks/useAlertMessage';
 
 const validSchema = yup.object().shape({
   name: yup.string().required(MSG_REQUIRED),
@@ -19,9 +26,12 @@ const validSchemaOfProperties = yup.object().shape({
   propertyValue: yup.string().required(MSG_REQUIRED)
 });
 
-export default function DialogMintNft({ dialogOpened, setDialogOpened }) {
+export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesireReload }) {
+  const { currentUser, network, myAlgoWallet, walletName } = useConnectWallet();
+  const { openLoading, closeLoading } = useLoading();
+  const { openAlert } = useAlertMessage();
+
   const [nftStandard, setNftStandard] = useState('arc69');
-  // const [uploadEnabled, setUploadEnabled] = useState(false);
   const [properties, setProperties] = useState({});
 
   const propertyKeys = useMemo(() => {
@@ -42,12 +52,96 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened }) {
       unitName: '',
       description: '',
       totalIssuance: 1,
-      file: null
+      file: undefined
     },
     validationSchema: validSchema,
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       const { name, unitName, description, totalIssuance, file } = values;
+      let assetName = name;
+      const enc = new TextEncoder();
       console.log('>>>>>> values => ', values);
+
+      try {
+        openLoading();
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('unitName', unitName);
+        formData.append('description', description);
+        formData.append('totalIssuance', totalIssuance);
+        formData.append('properties', JSON.stringify(properties));
+        formData.append('nftStandard', nftStandard);
+        formData.append('nftFile', file);
+
+        const resData = (await api.post('/nftRoute/createAndUploadMetadataFile', formData))['data'];
+        console.log('>>>>>>>>>>>>> resData => ', resData);
+
+        if (nftStandard === 'arc3') {
+          assetName = name.slice(-5) === '@arc3' ? name : `${name}@arc3`;
+        }
+
+        let algodServer = '';
+        if (network === 'MainNet') {
+          algodServer = ALGOD_SERVER_MAINNET;
+        } else {
+          algodServer = ALGOD_SERVER_TESTNET;
+        }
+
+        const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, algodServer, ALGOD_PORT);
+        const params = await algodClient.getTransactionParams().do();
+
+        const txn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject({
+          from: currentUser,
+          total: totalIssuance,
+          decimals: 0,
+          assetName,
+          unitName,
+          assetURL: `${BASE_URL_OF_IPFS}/${resData.IpfsHash}`,
+          assetMetadataHash: resData.metadataHash,
+          defaultFrozen: false,
+          freeze: currentUser,
+          manager: currentUser,
+          clawback: currentUser,
+          reserve: currentUser,
+          suggestedParams: params
+        });
+        const txId = txn.txID().toString();
+        console.log('>>>>>>>> txId => ', txId);
+
+        if (walletName === 'MyAlgo') {
+          const signedTxn = await myAlgoWallet.signTransaction(txn.toByte());
+          console.log('>>>>>>>>>> signedTxn => ', signedTxn);
+
+          await algodClient.sendRawTransaction(signedTxn.blob).do();
+        } else if (walletName === 'AlgoSigner') {
+          const txn_b64 = await AlgoSigner.encoding.msgpackToBase64(txn.toByte());
+          console.log('>>>>>>>> txn_b64 => ', txn_b64);
+          const signedTxns = await AlgoSigner.signTxn([{ txn: txn_b64 }]);
+          console.log('>>>>>>>> signedTxns => ', signedTxns);
+          const binarySignedTxn = await AlgoSigner.encoding.base64ToMsgpack(signedTxns[0].blob);
+          console.log('>>>>>>>> binarySignedTxn => ', binarySignedTxn);
+          await algodClient.sendRawTransaction(binarySignedTxn).do();
+        }
+
+        const confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4);
+        console.log('>>>>>>>> confirmedTxn => ', confirmedTxn);
+
+        const txnResponse = await algodClient.pendingTransactionInformation(txId).do();
+        console.log('>>>>>>>>> txnResponse => ', txnResponse);
+        closeLoading();
+        closeDialog();
+        openAlert({
+          severity: SUCCESS,
+          message: `Transaction ${txId} confirmed in round ${txnResponse['confirmed-round']}. The asset id is ${txnResponse['asset-index']}`
+        });
+        setDesireReload(true);
+      } catch (error) {
+        console.log('>>>>>>>>> error of DialogMintNft => ', error.message);
+        openAlert({
+          severity: ERROR,
+          message: error.message
+        });
+        closeLoading();
+      }
     }
   });
 
@@ -74,6 +168,11 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened }) {
     let cloneProperties = { ...properties };
     delete cloneProperties[key];
     setProperties(cloneProperties);
+  };
+
+  const handleSelectFile = (e) => {
+    console.log('>>>>>>>> e.target.files => ', e.target.files);
+    formik.setFieldValue('file', e.target.files[0]);
   };
 
   return (
@@ -109,10 +208,9 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened }) {
               //   >Upload</Button>
               // }}
               inputProps={{
-                accept: 'image/*, audio/*, video/*'
+                accept: 'image/*'
               }}
-              value={formik.values.file}
-              onChange={formik.handleChange}
+              onChange={(e) => handleSelectFile(e)}
               error={formik.touched.file && Boolean(formik.errors.file)}
               helperText={formik.touched.file && formik.errors.file}
               fullWidth
@@ -141,6 +239,20 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened }) {
               onChange={formik.handleChange}
               error={formik.touched.unitName && Boolean(formik.errors.unitName)}
               helperText={formik.touched.unitName && formik.errors.unitName}
+              fullWidth
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel htmlFor="unit-name">Total supply *</FormLabel>
+            <TextField
+              type="number"
+              name="totalIssuance"
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+              value={formik.values.totalIssuance}
+              onChange={formik.handleChange}
+              error={formik.touched.totalIssuance && Boolean(formik.errors.totalIssuance)}
+              helperText={formik.touched.totalIssuance && formik.errors.totalIssuance}
               fullWidth
             />
           </FormControl>
@@ -196,10 +308,10 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened }) {
               {propertyKeys.map(key => (
                 <Stack direction="row" justifyContent="space-between" alignItems="center" key={key}>
                   <Box width="45%">
-                    <Typography>{key}</Typography>
+                    <Typography>{showFirstLetters(key, 5)}</Typography>
                   </Box>
                   <Box width="45%">
-                    <Typography>{properties[key]}</Typography>
+                    <Typography>{showFirstLetters(properties[key], 5)}</Typography>
                   </Box>
                   <Box>
                     <IconButton color="error" onClick={() => deleteProperty(key)}>

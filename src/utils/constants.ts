@@ -31,6 +31,7 @@ export const BASE_URL_OF_TESTNET_SWAP =
   "https://testnet.tinyman.org/#/swap?asset_in=0&asset_out=";
 export const BASE_URL_OF_MAINNET_SWAP =
   "https://tinyman.org/#/swap?asset_in=0&asset_out=";
+export const BASE_URL_OF_IPFS = "https://ipfs.io/ipfs";
 
 export const BURNER_VAULT_ADDRESS =
   "7RFLMPOWFSZVTSCDTRPXXFSL224LBXJBMCWKIGOIXP6CRWDBWZ33TMB3OQ";

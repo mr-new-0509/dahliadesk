@@ -6,6 +6,7 @@ import NoData from '../../../../components/NoData'
 
 export default function TabNftCollection() {
   const [dialogOpened, setDialogOpened] = useState<boolean>(false)
+  const [desireReload, setDesireReload] = useState<boolean>(false)
 
   const openDialog = () => {
     setDialogOpened(true)
@@ -35,6 +36,7 @@ export default function TabNftCollection() {
       <DialogMintNft
         dialogOpened={dialogOpened}
         setDialogOpened={setDialogOpened}
+        setDesireReload={setDesireReload}
       />
     </Box>
   )
