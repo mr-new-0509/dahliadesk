@@ -96,7 +96,7 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesire
           assetName,
           unitName,
           assetURL: `${BASE_URL_OF_IPFS}/${resData.IpfsHash}`,
-          assetMetadataHash: resData.metadataHash,
+          // assetMetadataHash: resData.metadataHash,
           defaultFrozen: false,
           freeze: currentUser,
           manager: currentUser,
@@ -135,7 +135,7 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesire
         });
         setDesireReload(true);
       } catch (error) {
-        console.log('>>>>>>>>> error of DialogMintNft => ', error.message);
+        console.log('>>>>>>>>> error of DialogMintNft => ', error);
         openAlert({
           severity: ERROR,
           message: error.message

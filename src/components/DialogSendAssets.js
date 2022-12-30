@@ -6,12 +6,12 @@ import * as yup from 'yup';
 import { useFormik } from "formik";
 import algosdk from 'algosdk';
 import WAValidator from 'multicoin-address-validator';
-import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, ERROR, MSG_INVAILD_ADDRESS, MSG_REQUIRED, SUCCESS } from '../../../../utils/constants';
-import useConnectWallet from '../../../../hooks/useConnectWallet';
-import useLoading from '../../../../hooks/useLoading';
-import useAlertMessage from '../../../../hooks/useAlertMessage';
+import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, ERROR, MSG_INVAILD_ADDRESS, MSG_REQUIRED, SUCCESS } from '../utils/constants';
+import useConnectWallet from '../hooks/useConnectWallet';
+import useLoading from '../hooks/useLoading';
+import useAlertMessage from '../hooks/useAlertMessage';
 
-export default function DialogSendAssets({ dialogOpened, setDialogOpened, asset, setDesireReload }) {
+export default function DialogSendAssets({ dialogTitle, dialogOpened, setDialogOpened, asset, setDesireReload }) {
   const { network, currentUser, walletName, myAlgoWallet } = useConnectWallet();
   const { openLoading, closeLoading } = useLoading();
   const { openAlert } = useAlertMessage();
@@ -115,7 +115,7 @@ export default function DialogSendAssets({ dialogOpened, setDialogOpened, asset,
             severity: SUCCESS,
             message: `Transaction ${txId} confirmed in round ${txnResponse['confirmed-round']}. The asset id is ${txnResponse['asset-index']}`
           });
-          setDesireReload(true)
+          setDesireReload(true);
         } catch (error) {
           console.log('>>>>>>>>> error => ', error.message);
           openAlert({
@@ -132,7 +132,7 @@ export default function DialogSendAssets({ dialogOpened, setDialogOpened, asset,
     <Dialog open={dialogOpened} onClose={() => closeDialog()} maxWidth="sm" fullWidth>
       <Stack direction="row" justifyContent="space-between" alignItems="center" pr={2} py={2}>
         <DialogTitle fontWeight={700}>
-          Send Assets
+          {dialogTitle}
         </DialogTitle>
         <IconButton onClick={() => closeDialog()}>
           <Icon icon="material-symbols:close-rounded" />

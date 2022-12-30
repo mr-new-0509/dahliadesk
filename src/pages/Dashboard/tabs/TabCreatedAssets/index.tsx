@@ -4,20 +4,22 @@ import { Icon } from '@iconify/react'
 import algosdk from 'algosdk'
 import DialogCreateAsset from './DialogCreateAsset'
 import NoData from '../../../../components/NoData'
-import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_TOKEN, ALGOD_SERVER_TESTNET } from '../../../../utils/constants'
+import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_TOKEN, ALGOD_SERVER_TESTNET, ERROR, MSG_ERROR_OCCURED } from '../../../../utils/constants'
 import useConnectWallet from '../../../../hooks/useConnectWallet'
 import CardAsset from './CardAsset'
 import useLoading from '../../../../hooks/useLoading'
-import DialogSendAssets from './DialogSendAssets'
+import DialogSendAssets from '../../../../components/DialogSendAssets'
 import DialogModifyAsset from './DialogModifyAsset'
 import DialogFreezeAsset from './DialogFreezeAsset'
 import DialogRevokeAsset from './DialogRevokeAsset'
 import DialogDeleteAsset from './DialogDeleteAsset'
 import DialogBurnAsset from './DialogBurnAsset'
+import useAlertMessage from '../../../../hooks/useAlertMessage'
 
 export default function TabCreatedAssets() {
   const { network, currentUser, setBalanceAct } = useConnectWallet()
   const { openLoading, closeLoading } = useLoading()
+  const { openAlert } = useAlertMessage()
 
   const [hideZeroBalance, setHideZeroBalance] = useState<boolean>(false)
   const [dialogOpened, setDialogOpened] = useState<boolean>(false)
@@ -44,20 +46,29 @@ export default function TabCreatedAssets() {
   }, [desireReload])
 
   const getAssets = async () => {
-    openLoading()
-    let algodServer = ''
-    if (network === 'MainNet') {
-      algodServer = ALGOD_SERVER_MAINNET;
-    } else {
-      algodServer = ALGOD_SERVER_TESTNET;
-    }
-    const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, algodServer, ALGOD_PORT);
+    try {
+      openLoading()
+      let algodServer = ''
+      if (network === 'MainNet') {
+        algodServer = ALGOD_SERVER_MAINNET;
+      } else {
+        algodServer = ALGOD_SERVER_TESTNET;
+      }
+      const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, algodServer, ALGOD_PORT);
 
-    const accountInfo = await algodClient.accountInformation(currentUser).do();
-    console.log('>>>>>>>> accountInfo => ', accountInfo)
-    setBalanceAct(accountInfo.amount)
-    setCreatedAssets(accountInfo['created-assets'])
-    closeLoading()
+      const accountInfo = await algodClient.accountInformation(currentUser).do();
+      console.log('>>>>>>>> accountInfo => ', accountInfo)
+      setBalanceAct(accountInfo.amount)
+      setCreatedAssets(accountInfo['created-assets'])
+      closeLoading()
+    } catch (error) {
+      console.log('>>>>>>> error of getAssets => ', error)
+      openAlert({
+        severity: ERROR,
+        message: MSG_ERROR_OCCURED
+      })
+      closeLoading()
+    }
   }
 
   const handleCheck = () => {
@@ -127,6 +138,7 @@ export default function TabCreatedAssets() {
       {selectedAsset && (
         <>
           <DialogSendAssets
+            dialogTitle="Send assets"
             dialogOpened={dialogSendAssetsOpened}
             setDialogOpened={setDialogSendAssetsOpened}
             asset={selectedAsset}

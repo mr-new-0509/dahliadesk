@@ -13,6 +13,7 @@ export const MSG_NO_ACCOUNT =
 export const MSG_REQUIRED = "Required.";
 export const MSG_INVAILD_ADDRESS = "Invalid address.";
 export const MSG_UNSUPPORTED_FILE_FORMAT = "Unsupported file format.";
+export const MSG_ERROR_OCCURED = "Something was wrong.";
 
 export const WALLET_ALGO_SIGNER = "AlgoSigner";
 export const WALLET_MY_ALGO = "MyAlgo";
@@ -35,3 +36,4 @@ export const BASE_URL_OF_IPFS = "https://ipfs.io/ipfs";
 
 export const BURNER_VAULT_ADDRESS =
   "7RFLMPOWFSZVTSCDTRPXXFSL224LBXJBMCWKIGOIXP6CRWDBWZ33TMB3OQ";
+export const DEFAULT_NFT_IMAGE = "/assets/images/nft-no-image.png";
