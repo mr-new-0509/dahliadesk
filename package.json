@@ -21,6 +21,7 @@
     "algorand-qrcode": "^2.1.1",
     "algosdk": "^1.24.1",
     "assert": "^2.0.0",
+    "axios": "^1.2.2",
     "copy-to-clipboard": "^3.3.3",
     "crypto-browserify": "^3.12.0",
     "ethers": "^5.7.2",
@@ -69,5 +70,6 @@
   },
   "devDependencies": {
     "process": "^0.11.10"
-  }
+  },
+  "proxy": "http://localhost:5000/"
 }

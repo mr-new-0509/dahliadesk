@@ -12,6 +12,7 @@ export const MSG_NO_ACCOUNT =
   "You have no account in your wallet, Please create one.";
 export const MSG_REQUIRED = "Required.";
 export const MSG_INVAILD_ADDRESS = "Invalid address.";
+export const MSG_UNSUPPORTED_FILE_FORMAT = "Unsupported file format.";
 
 export const WALLET_ALGO_SIGNER = "AlgoSigner";
 export const WALLET_MY_ALGO = "MyAlgo";
