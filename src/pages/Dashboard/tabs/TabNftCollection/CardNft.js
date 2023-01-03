@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardActions, CardContent, CardMedia, IconButton, Link, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from '@mui/material';
-import { BASE_URL_OF_IPFS, BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_TESTNET_EXPLORER, DEFAULT_NFT_IMAGE } from '../../../../utils/constants';
+import { BASE_URL_OF_IPFS, BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_TESTNET_EXPLORER, DEFAULT_NFT_IMAGE, UNEXPECTED_TOKEN } from '../../../../utils/constants';
 import { Icon } from '@iconify/react';
 import useConnectWallet from '../../../../hooks/useConnectWallet';
 import PopupState, { bindMenu, bindTrigger } from 'material-ui-popup-state';
@@ -19,14 +19,23 @@ export default function CardNft({
 
   useEffect(() => {
     (async () => {
-      let metadataUrl = '';
-      if (nft['params']['url'].slice(0, 7) === 'ipfs://') {
-        metadataUrl = `${BASE_URL_OF_IPFS}/${nft['params']['url'].slice(7).split('#')[0]}`;
-      } else {
-        metadataUrl = nft['params']['url'];
+      try {
+        let metadataUrl = '';
+        if (nft['params']['url'].slice(0, 7) === 'ipfs://') {
+          metadataUrl = `${BASE_URL_OF_IPFS}/${nft['params']['url'].slice(7).split('#')[0]}`;
+        } else {
+          metadataUrl = nft['params']['url'];
+        }
+        const data = await (await fetch(metadataUrl)).json();
+        setMetadata(data);
+      } catch (error) {
+        console.log('>>>>>>> error of getting metadata => ', error.message);
+        if(error.message.slice(0, 16) === UNEXPECTED_TOKEN) {
+          setMetadata({
+            image: `${BASE_URL_OF_IPFS}/${nft['params']['url'].slice(7)}`
+          })
+        }
       }
-      const data = await (await fetch(metadataUrl)).json();
-      setMetadata(data);
     })();
   }, [nft]);
 
