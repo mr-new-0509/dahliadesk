@@ -11,6 +11,7 @@ import CardNft from './CardNft'
 import useAlertMessage from '../../../../hooks/useAlertMessage'
 import DialogSendAssets from '../../../../components/DialogSendAssets'
 import DialogMetadata from './DialogMetadata'
+import DialogBurnAsset from '../../../../components/DialogBurnAsset'
 
 export default function TabNftCollection() {
   const { openLoading, closeLoading } = useLoading()
@@ -143,6 +144,13 @@ export default function TabNftCollection() {
             setDialogOpened={setDialogMetadataOpened}
             asset={selectedNft}
             metadata={metadataOfSelectedNft}
+          />
+          <DialogBurnAsset
+            dialotTitle="Burn NFT"
+            dialogOpened={dialogBurnOpened}
+            setDialogOpened={setDialogBurnOpened}
+            asset={selectedNft}
+            setDesireReload={setDesireReload}
           />
         </>
       )}

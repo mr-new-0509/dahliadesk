@@ -13,7 +13,7 @@ import DialogModifyAsset from './DialogModifyAsset'
 import DialogFreezeAsset from './DialogFreezeAsset'
 import DialogRevokeAsset from './DialogRevokeAsset'
 import DialogDeleteAsset from './DialogDeleteAsset'
-import DialogBurnAsset from './DialogBurnAsset'
+import DialogBurnAsset from '../../../../components/DialogBurnAsset'
 import useAlertMessage from '../../../../hooks/useAlertMessage'
 
 export default function TabCreatedAssets() {
@@ -173,6 +173,7 @@ export default function TabCreatedAssets() {
             setDialogOpened={setDialogBurnAssetOpened}
             asset={selectedAsset}
             setDesireReload={setDesireReload}
+            dialotTitle="Burn assets"
           />
         </>
       )}

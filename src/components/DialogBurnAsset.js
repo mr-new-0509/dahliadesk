@@ -6,12 +6,12 @@ import * as yup from 'yup';
 import { useFormik } from "formik";
 import algosdk from 'algosdk';
 import WAValidator from 'multicoin-address-validator';
-import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_TESTNET_EXPLORER, BURNER_VAULT_ADDRESS, ERROR, MSG_INVAILD_ADDRESS, MSG_REQUIRED, SUCCESS } from '../../../../utils/constants';
-import useConnectWallet from '../../../../hooks/useConnectWallet';
-import useLoading from '../../../../hooks/useLoading';
-import useAlertMessage from '../../../../hooks/useAlertMessage';
+import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_TESTNET_EXPLORER, BURNER_VAULT_ADDRESS, ERROR, MSG_INVAILD_ADDRESS, MSG_REQUIRED, SUCCESS } from '../utils/constants';
+import useConnectWallet from '../hooks/useConnectWallet';
+import useLoading from '../hooks/useLoading';
+import useAlertMessage from '../hooks/useAlertMessage';
 
-export default function DialogBurnAsset({ dialogOpened, setDialogOpened, asset, setDesireReload }) {
+export default function DialogBurnAsset({ dialogOpened, setDialogOpened, asset, setDesireReload, dialotTitle }) {
   const { network, currentUser, walletName, myAlgoWallet } = useConnectWallet();
   const { openLoading, closeLoading } = useLoading();
   const { openAlert } = useAlertMessage();
@@ -55,6 +55,7 @@ export default function DialogBurnAsset({ dialogOpened, setDialogOpened, asset, 
     onSubmit: async (values) => {
       console.log('>>>>>> values => ', values);
       const { recipient, amount, note } = values;
+      console.log(">>>>>> amount * 10 ** asset['params']['decimals'] => ", amount * 10 ** asset['params']['decimals']);
       const isValidRecipient = WAValidator.validate(recipient, 'algo');
 
       //  Validate whether the recipient has a valid address
@@ -139,7 +140,7 @@ export default function DialogBurnAsset({ dialogOpened, setDialogOpened, asset, 
     <Dialog open={dialogOpened} onClose={() => closeDialog()} maxWidth="sm" fullWidth>
       <Stack direction="row" justifyContent="space-between" alignItems="center" pr={2} py={2}>
         <DialogTitle fontWeight={700}>
-          Burn Asset
+          {dialotTitle}
         </DialogTitle>
         <IconButton onClick={() => closeDialog()}>
           <Icon icon="material-symbols:close-rounded" />

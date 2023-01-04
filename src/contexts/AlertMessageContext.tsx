@@ -38,12 +38,6 @@ const initialState: IInitialState = {
 };
 
 const handlers: IHandlers = {
-  INITIALIZE: (state: object, action: IAction) => {
-    return {
-      ...state,
-      ...action.payload
-    };
-  },
   SET_IS_OPENED: (state: object, action: IAction) => {
     return {
       ...state,
@@ -102,12 +96,16 @@ function AlertMessageProvider({ children }: IProps) {
    */
   const closeAlert = () => {
     dispatch({
-      type: 'INITIALIZE',
-      payload: {
-        isOpened: false,
-        severity: SUCCESS,
-        message: ''
-      }
+      type: 'SET_IS_OPENED',
+      payload: false
+    });
+    dispatch({
+      type: 'SET_SEVERITY',
+      payload: SUCCESS
+    });
+    dispatch({
+      type: 'SET_MESSAGE',
+      payload: ''
     });
   };
 

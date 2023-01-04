@@ -157,10 +157,10 @@ export default function CardNft({
                   <ListItemIcon><Icon icon="ic:baseline-remove-red-eye" /></ListItemIcon>
                   <ListItemText>View metadata</ListItemText>
                 </MenuItem>
-                {/* <MenuItem onClick={() => openDialogBurn(popupState)}>
+                <MenuItem onClick={() => openDialogBurn(popupState)}>
                   <ListItemIcon><Icon icon="cil:burn" /></ListItemIcon>
                   <ListItemText>Burn supply</ListItemText>
-                </MenuItem> */}
+                </MenuItem>
               </Menu>
             </>
           )}
