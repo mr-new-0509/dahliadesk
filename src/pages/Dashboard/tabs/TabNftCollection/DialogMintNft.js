@@ -58,8 +58,6 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesire
     onSubmit: async (values) => {
       const { name, unitName, description, totalIssuance, file } = values;
       let assetName = name;
-      const enc = new TextEncoder();
-      console.log('>>>>>> values => ', values);
 
       try {
         openLoading();
@@ -74,7 +72,6 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesire
 
         const resData = (await api.post('/nftRoute/createAndUploadMetadataFile', formData))['data'];
         console.log('>>>>>>>>>>>>> resData => ', resData);
-
         if (nftStandard === 'arc3') {
           assetName = name.slice(-5) === '@arc3' ? name : `${name}@arc3`;
         }
@@ -96,7 +93,7 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesire
           assetName,
           unitName,
           assetURL: `${BASE_URL_OF_IPFS}/${resData.IpfsHash}`,
-          // assetMetadataHash: resData.metadataHash,
+          assetMetadataHash: new Uint8Array([...resData.metadataHash]),
           defaultFrozen: false,
           freeze: currentUser,
           manager: currentUser,
@@ -109,21 +106,16 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesire
 
         if (walletName === 'MyAlgo') {
           const signedTxn = await myAlgoWallet.signTransaction(txn.toByte());
-          console.log('>>>>>>>>>> signedTxn => ', signedTxn);
 
           await algodClient.sendRawTransaction(signedTxn.blob).do();
         } else if (walletName === 'AlgoSigner') {
           const txn_b64 = await AlgoSigner.encoding.msgpackToBase64(txn.toByte());
-          console.log('>>>>>>>> txn_b64 => ', txn_b64);
           const signedTxns = await AlgoSigner.signTxn([{ txn: txn_b64 }]);
-          console.log('>>>>>>>> signedTxns => ', signedTxns);
           const binarySignedTxn = await AlgoSigner.encoding.base64ToMsgpack(signedTxns[0].blob);
-          console.log('>>>>>>>> binarySignedTxn => ', binarySignedTxn);
           await algodClient.sendRawTransaction(binarySignedTxn).do();
         }
 
-        const confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4);
-        console.log('>>>>>>>> confirmedTxn => ', confirmedTxn);
+        await algosdk.waitForConfirmation(algodClient, txId, 4);
 
         const txnResponse = await algodClient.pendingTransactionInformation(txId).do();
         console.log('>>>>>>>>> txnResponse => ', txnResponse);
@@ -134,6 +126,7 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesire
           message: `Transaction ${txId} confirmed in round ${txnResponse['confirmed-round']}. The asset id is ${txnResponse['asset-index']}`
         });
         setDesireReload(true);
+        closeLoading();
       } catch (error) {
         console.log('>>>>>>>>> error of DialogMintNft => ', error);
         openAlert({

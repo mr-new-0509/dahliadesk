@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardActions, CardContent, CardMedia, IconButton, Link, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from '@mui/material';
-import { BASE_URL_OF_IPFS, BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_TESTNET_EXPLORER, DEFAULT_NFT_IMAGE, UNEXPECTED_TOKEN } from '../../../../utils/constants';
+import { BASE_URL_OF_IPFS, BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_MAINNET_INDEX_EXPLORER, BASE_URL_OF_TESTNET_INDEX_EXPLORER, BASE_URL_OF_TESTNET_EXPLORER, DEFAULT_NFT_IMAGE, UNEXPECTED_TOKEN } from '../../../../utils/constants';
 import { Icon } from '@iconify/react';
 import useConnectWallet from '../../../../hooks/useConnectWallet';
 import PopupState, { bindMenu, bindTrigger } from 'material-ui-popup-state';
+import { Arc69 } from '../../../../utils/classes';
 
 export default function CardNft({
   nft,
@@ -11,7 +12,8 @@ export default function CardNft({
   setDialogOptOutOpened,
   setDialogMetadataOpened,
   setDialogBurnOpened,
-  setSelectedNft
+  setSelectedNft,
+  setMetadataOfSelectedNft
 }) {
   const { network } = useConnectWallet();
   const [metadata, setMetadata] = useState(null);
@@ -30,10 +32,19 @@ export default function CardNft({
         setMetadata(data);
       } catch (error) {
         console.log('>>>>>>> error of getting metadata => ', error.message);
-        if(error.message.slice(0, 16) === UNEXPECTED_TOKEN) {
+
+        if (error.message.slice(0, 16) === UNEXPECTED_TOKEN) {
+          let arc69 = null;
+          if (network === 'MainNet') {
+            arc69 = new Arc69(BASE_URL_OF_MAINNET_INDEX_EXPLORER);
+          } else {
+            arc69 = new Arc69(BASE_URL_OF_TESTNET_INDEX_EXPLORER);
+          }
+          const _metadata = await arc69.fetch(nft['index']);
           setMetadata({
-            image: `${BASE_URL_OF_IPFS}/${nft['params']['url'].slice(7)}`
-          })
+            ..._metadata,
+            media_url: `${BASE_URL_OF_IPFS}/${nft['params']['url'].slice(7)}`
+          });
         }
       }
     })();
@@ -91,6 +102,7 @@ export default function CardNft({
 
   const openDialogMetadata = (popupState) => {
     setSelectedNft(nft);
+    setMetadataOfSelectedNft(metadata);
     setDialogMetadataOpened(true);
     popupState.close();
   };
@@ -140,12 +152,12 @@ export default function CardNft({
                 {/* <MenuItem onClick={() => openDialogOptOut(popupState)}>
                   <ListItemIcon><Icon icon="mdi:minus-circle-outline" /></ListItemIcon>
                   <ListItemText>Opt-Out</ListItemText>
-                </MenuItem>
+                </MenuItem> */}
                 <MenuItem onClick={() => openDialogMetadata(popupState)}>
                   <ListItemIcon><Icon icon="ic:baseline-remove-red-eye" /></ListItemIcon>
                   <ListItemText>View metadata</ListItemText>
                 </MenuItem>
-                <MenuItem onClick={() => openDialogBurn(popupState)}>
+                {/* <MenuItem onClick={() => openDialogBurn(popupState)}>
                   <ListItemIcon><Icon icon="cil:burn" /></ListItemIcon>
                   <ListItemText>Burn supply</ListItemText>
                 </MenuItem> */}

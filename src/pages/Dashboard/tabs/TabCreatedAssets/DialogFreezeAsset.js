@@ -1,15 +1,16 @@
 /* global AlgoSigner */
 
 import React, { useMemo, useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Icon, IconButton, Radio, RadioGroup, Stack, TextField, Typography } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, IconButton, Radio, RadioGroup, Stack, TextField, Typography } from '@mui/material';
 import * as yup from 'yup';
 import { useFormik } from "formik";
 import WAValidator from 'multicoin-address-validator';
+import algosdk from 'algosdk';
+import { Icon } from '@iconify/react';
 import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, ERROR, MSG_INVAILD_ADDRESS, MSG_REQUIRED, SUCCESS } from '../../../../utils/constants';
 import useLoading from '../../../../hooks/useLoading';
 import useAlertMessage from '../../../../hooks/useAlertMessage';
 import useConnectWallet from '../../../../hooks/useConnectWallet';
-import algosdk from 'algosdk';
 
 const validSchema = yup.object().shape({
   freezeTarget: yup.string().required(MSG_REQUIRED),
@@ -129,7 +130,7 @@ export default function DialogFreezeAsset({ dialogOpened, setDialogOpened, asset
   return (
     <Dialog open={dialogOpened} onClose={() => closeDialog()} maxWidth="sm" fullWidth>
       <Stack direction="row" justifyContent="space-between" alignItems="center" pr={2} pt={2}>
-        <DialogTitle component={Typography} fontWeight={700}>
+        <DialogTitle fontWeight={700}>
           Freeze/Unfreeze asset
         </DialogTitle>
         <IconButton onClick={() => closeDialog()}>

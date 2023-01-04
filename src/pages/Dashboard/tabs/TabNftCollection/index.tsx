@@ -10,6 +10,7 @@ import algosdk from 'algosdk'
 import CardNft from './CardNft'
 import useAlertMessage from '../../../../hooks/useAlertMessage'
 import DialogSendAssets from '../../../../components/DialogSendAssets'
+import DialogMetadata from './DialogMetadata'
 
 export default function TabNftCollection() {
   const { openLoading, closeLoading } = useLoading()
@@ -24,6 +25,7 @@ export default function TabNftCollection() {
   const [dialogMetadataOpened, setDialogMetadataOpened] = useState<boolean>(false)
   const [dialogBurnOpened, setDialogBurnOpened] = useState<boolean>(false)
   const [selectedNft, setSelectedNft] = useState(null)
+  const [metadataOfSelectedNft, setMetadataOfSelectedNft] = useState(null)
 
   useEffect(() => {
     getNfts()
@@ -112,6 +114,7 @@ export default function TabNftCollection() {
                   setDialogMetadataOpened={setDialogMetadataOpened}
                   setDialogBurnOpened={setDialogBurnOpened}
                   setSelectedNft={setSelectedNft}
+                  setMetadataOfSelectedNft={setMetadataOfSelectedNft}
                 />
               </Grid>
             ))}
@@ -134,6 +137,12 @@ export default function TabNftCollection() {
             setDialogOpened={setDialogSendNftOpened}
             asset={selectedNft}
             setDesireReload={setDesireReload}
+          />
+          <DialogMetadata
+            dialogOpened={dialogMetadataOpened}
+            setDialogOpened={setDialogMetadataOpened}
+            asset={selectedNft}
+            metadata={metadataOfSelectedNft}
           />
         </>
       )}

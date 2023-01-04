@@ -32,3 +32,9 @@ export const showFirstLetters = (str: string, lengthToShow: number): string => {
 export const convertIpfsCidV0ToByte32 = (cid: string) => {
   return `0x${bs58.decode(cid).slice(2).toString()}`;
 };
+
+export const lengthInUtf8Bytes = (str: string) => {
+  // Matches only the 10.. bytes that are non-initial characters in a multi-byte sequence.
+  var m = encodeURIComponent(str).match(/%[89ABab]/g);
+  return str.length + (m ? m.length : 0);
+}
