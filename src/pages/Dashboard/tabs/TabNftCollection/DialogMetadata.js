@@ -4,7 +4,6 @@ import { blue } from '@mui/material/colors';
 import { Icon } from '@iconify/react';
 
 export default function DialogMetadata({ dialogOpened, setDialogOpened, asset, metadata }) {
-
   const closeDialog = () => {
     setDialogOpened(false);
   };
