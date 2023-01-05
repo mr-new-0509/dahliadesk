@@ -11,7 +11,7 @@ import useConnectWallet from '../hooks/useConnectWallet';
 import useLoading from '../hooks/useLoading';
 import useAlertMessage from '../hooks/useAlertMessage';
 
-export default function DialogBurnAsset({ dialogOpened, setDialogOpened, asset, setDesireReload, dialotTitle }) {
+export default function DialogBurnAsset({ dialogOpened, setDialogOpened, asset, setDesireReload, dialogTitle }) {
   const { network, currentUser, walletName, myAlgoWallet } = useConnectWallet();
   const { openLoading, closeLoading } = useLoading();
   const { openAlert } = useAlertMessage();
@@ -140,7 +140,7 @@ export default function DialogBurnAsset({ dialogOpened, setDialogOpened, asset, 
     <Dialog open={dialogOpened} onClose={() => closeDialog()} maxWidth="sm" fullWidth>
       <Stack direction="row" justifyContent="space-between" alignItems="center" pr={2} py={2}>
         <DialogTitle fontWeight={700}>
-          {dialotTitle}
+          {dialogTitle}
         </DialogTitle>
         <IconButton onClick={() => closeDialog()}>
           <Icon icon="material-symbols:close-rounded" />

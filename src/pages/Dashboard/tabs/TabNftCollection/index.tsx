@@ -146,7 +146,7 @@ export default function TabNftCollection() {
             metadata={metadataOfSelectedNft}
           />
           <DialogBurnAsset
-            dialotTitle="Burn NFT"
+            dialogTitle="Burn NFT"
             dialogOpened={dialogBurnOpened}
             setDialogOpened={setDialogBurnOpened}
             asset={selectedNft}

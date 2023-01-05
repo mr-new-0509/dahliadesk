@@ -4,6 +4,7 @@ import useConnectWallet from '../../../../hooks/useConnectWallet';
 import { BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_TESTNET_EXPLORER, BASE_URL_OF_MAINNET_SWAP, BASE_URL_OF_TESTNET_SWAP } from '../../../../utils/constants';
 import { Icon } from '@iconify/react';
 import PopupState, { bindMenu, bindTrigger } from 'material-ui-popup-state';
+import useLoading from '../../../../hooks/useLoading';
 
 interface IAssetInfo {
   amount: number;
@@ -29,15 +30,18 @@ export default function CardOptedInAsset({
   setDialogBurnOpened
 }: IProps) {
   const { network, currentUser } = useConnectWallet()
+  const { openLoading, closeLoading } = useLoading()
 
   const [asset, setAsset] = useState(null)
 
   useEffect(() => {
     console.log('>>>>>>> assetInfo => ', assetInfo);
     (async () => {
+      openLoading()
       const { assets } = await algoIndexerClient.searchForAssets().index(assetInfo['asset-id']).do()
       console.log('>>>>>>> assets => ', assets)
       setAsset(assets[0])
+      closeLoading()
     })()
   }, [assetInfo])
 

@@ -9,6 +9,7 @@ import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, ER
 import algosdk from 'algosdk'
 import useAlertMessage from '../../../../hooks/useAlertMessage'
 import CardOptedInAsset from './CardOptedInAsset'
+import DialogBurnAsset from '../../../../components/DialogBurnAsset'
 
 export default function TabOptedAssets() {
   const { openLoading, closeLoading } = useLoading()
@@ -135,6 +136,15 @@ export default function TabOptedAssets() {
         dialogOpened={dialogOpened}
         setDialogOpened={setDialogOpened}
       />
+      {selectedAsset && (
+        <DialogBurnAsset
+          dialogTitle="Burn asset"
+          dialogOpened={dialogBurnOpened}
+          setDialogOpened={setDialogBurnOpened}
+          asset={selectedAsset}
+          setDesireReload={setDesireReload}
+        />
+      )}
     </Box>
   )
 }

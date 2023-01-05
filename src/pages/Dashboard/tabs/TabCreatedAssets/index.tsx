@@ -173,7 +173,7 @@ export default function TabCreatedAssets() {
             setDialogOpened={setDialogBurnAssetOpened}
             asset={selectedAsset}
             setDesireReload={setDesireReload}
-            dialotTitle="Burn assets"
+            dialogTitle="Burn assets"
           />
         </>
       )}
