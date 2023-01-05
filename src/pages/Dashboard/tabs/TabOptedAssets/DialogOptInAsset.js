@@ -1,32 +1,22 @@
 /* global AlgoSigner */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Button, ButtonGroup, Dialog, DialogContent, DialogTitle, Icon as MuiIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, MenuList, Stack, TextField, Typography } from '@mui/material';
+import React, { useMemo, useState } from 'react';
+import { Box, Button, ButtonGroup, Dialog, DialogContent, DialogTitle, IconButton, ListItemIcon, ListItemText, MenuItem, MenuList, Stack, TextField, Typography } from '@mui/material';
 import { Icon } from '@iconify/react';
 import algosdk from 'algosdk';
 import useConnectWallet from '../../../../hooks/useConnectWallet';
-import { ALGOD_PORT, ALGOD_TOKEN, INDEXER_SERVER_MAINNET, INDEXER_SERVER_TESTNET } from '../../../../utils/constants';
+import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, ERROR, SUCCESS } from '../../../../utils/constants';
 import useLoading from '../../../../hooks/useLoading';
+import useAlertMessage from '../../../../hooks/useAlertMessage';
 
-export default function DialogOptInAsset({ dialogOpened, setDialogOpened }) {
-  const { network, currentUser } = useConnectWallet();
+export default function DialogOptInAsset({ dialogOpened, setDialogOpened, algoIndexerClient }) {
+  const { network, currentUser, walletName, myAlgoWallet } = useConnectWallet();
   const { openLoading, closeLoading } = useLoading();
+  const { openAlert } = useAlertMessage();
 
   const [keywordKind, setKeywordKind] = useState('name');
   const [keyword, setKeyword] = useState('');
   const [assets, setAssets] = useState([]);
-  const [algoIndexerClient, setAlgoIndexerClient] = useState(null);
-
-  useEffect(() => {
-    let indexerServer = '';
-    if (network === 'MainNet') {
-      indexerServer = INDEXER_SERVER_MAINNET;
-    } else {
-      indexerServer = INDEXER_SERVER_TESTNET;
-    }
-    const indexerClient = new algosdk.Indexer(ALGOD_TOKEN, indexerServer, ALGOD_PORT);
-    setAlgoIndexerClient(indexerClient);
-  }, [network]);
 
   const placeholderOfSearchInput = useMemo(() => {
     if (keywordKind === 'name') {
@@ -63,6 +53,60 @@ export default function DialogOptInAsset({ dialogOpened, setDialogOpened }) {
       closeLoading();
     } else {
       setAssets([]);
+    }
+  };
+
+  const optInAsset = async (assetIndex) => {
+    try {
+      let algodServer = '';
+      if (network === 'MainNet') {
+        algodServer = ALGOD_SERVER_MAINNET;
+      } else {
+        algodServer = ALGOD_SERVER_TESTNET;
+      }
+
+      const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, algodServer, ALGOD_PORT);
+      const params = await algodClient.getTransactionParams().do();
+
+      const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+        from: currentUser,
+        suggestedParams: params,
+        to: currentUser,
+        amount: 0,
+        assetIndex
+      });
+      const txId = txn.txID().toString();
+      console.log('>>>>>>>> txId => ', txId);
+
+      if (walletName === 'MyAlgo') {
+        const signedTxn = await myAlgoWallet.signTransaction(txn.toByte());
+
+        await algodClient.sendRawTransaction(signedTxn.blob).do();
+      } else if (walletName === 'AlgoSigner') {
+        const txn_b64 = await AlgoSigner.encoding.msgpackToBase64(txn.toByte());
+        const signedTxns = await AlgoSigner.signTxn([{ txn: txn_b64 }]);
+        const binarySignedTxn = await AlgoSigner.encoding.base64ToMsgpack(signedTxns[0].blob);
+        await algodClient.sendRawTransaction(binarySignedTxn).do();
+      }
+
+      await algosdk.waitForConfirmation(algodClient, txId, 4);
+
+      const txnResponse = await algodClient.pendingTransactionInformation(txId).do();
+      console.log('>>>>>>>>> txnResponse => ', txnResponse);
+      closeLoading();
+      closeDialog();
+      openAlert({
+        severity: SUCCESS,
+        message: `Transaction ${txId} confirmed in round ${txnResponse['confirmed-round']}. The asset id is ${txnResponse['asset-index']}`
+      });
+      closeLoading();
+    } catch (error) {
+      console.log('>>>>>>>>> error of DialogMintNft => ', error);
+      openAlert({
+        severity: ERROR,
+        message: error.message
+      });
+      closeLoading();
     }
   };
 
@@ -111,7 +155,7 @@ export default function DialogOptInAsset({ dialogOpened, setDialogOpened }) {
         ) : (
           <MenuList>
             {assets.map(assetItem => (
-              <MenuItem key={assetItem?.index}>
+              <MenuItem key={assetItem?.index} onClick={() => optInAsset(assetItem?.index)}>
                 <ListItemText>
                   {assetItem.params.name}
                 </ListItemText>
