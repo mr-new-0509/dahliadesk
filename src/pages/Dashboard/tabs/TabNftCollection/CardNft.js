@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardActions, CardContent, CardMedia, Grid, IconButton, Link, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from '@mui/material';
+import PopupState, { bindMenu, bindTrigger } from 'material-ui-popup-state';
 import { BASE_URL_OF_IPFS, BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_MAINNET_INDEX_EXPLORER, BASE_URL_OF_TESTNET_INDEX_EXPLORER, BASE_URL_OF_TESTNET_EXPLORER, DEFAULT_NFT_IMAGE, UNEXPECTED_TOKEN } from '../../../../utils/constants';
 import { Icon } from '@iconify/react';
 import useConnectWallet from '../../../../hooks/useConnectWallet';
-import PopupState, { bindMenu, bindTrigger } from 'material-ui-popup-state';
 import { Arc69 } from '../../../../utils/classes';
 import useLoading from '../../../../hooks/useLoading';
 
