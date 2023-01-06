@@ -68,6 +68,7 @@ export default function TabNftCollection() {
               return true;
             }
           }
+          return false;
         }
       )
       console.log('>>>>>>>>> nfts => ', _nfts)

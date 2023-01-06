@@ -52,7 +52,7 @@ export default function DashboardLayout() {
       >
         <Box>
           <Stack direction="row" justifyContent="center" bgcolor="#316db7" py={3}>
-            <Box component="img" src="/assets/images/logo.png" alt="logo" width={148} />
+            <Box component="img" src="/assets/images/logo-white.png" alt="logo" width={148} />
           </Stack>
 
           {/* Wallet data */}
