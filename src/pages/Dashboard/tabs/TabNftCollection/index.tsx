@@ -5,7 +5,7 @@ import DialogMintNft from './DialogMintNft'
 import NoData from '../../../../components/NoData'
 import useLoading from '../../../../hooks/useLoading'
 import useConnectWallet from '../../../../hooks/useConnectWallet'
-import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, BASE_URL_OF_IPFS, ERROR, MSG_ERROR_OCCURED } from '../../../../utils/constants'
+import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, ERROR, INDEXER_SERVER_MAINNET, INDEXER_SERVER_TESTNET, MSG_ERROR_OCCURED } from '../../../../utils/constants'
 import algosdk from 'algosdk'
 import CardNft from './CardNft'
 import useAlertMessage from '../../../../hooks/useAlertMessage'
@@ -20,21 +20,23 @@ export default function TabNftCollection() {
 
   const [dialogOpened, setDialogOpened] = useState<boolean>(false)
   const [desireReload, setDesireReload] = useState<boolean>(false)
-  const [nfts, setNfts] = useState<Array<any>>([])
   const [dialogSendNftOpened, setDialogSendNftOpened] = useState<boolean>(false)
   const [dialogOptOutOpened, setDialogOptOutOpened] = useState<boolean>(false)
   const [dialogMetadataOpened, setDialogMetadataOpened] = useState<boolean>(false)
   const [dialogBurnOpened, setDialogBurnOpened] = useState<boolean>(false)
   const [selectedNft, setSelectedNft] = useState(null)
   const [metadataOfSelectedNft, setMetadataOfSelectedNft] = useState(null)
+  const [assets, setAssets] = useState([])
+  const [algoIndexerClient, setAlgoIndexerClient] = useState<any>(null)
 
   useEffect(() => {
-    getNfts()
+    getAssets()
+    getAlgoIndexerClient()
   }, [network])
 
   useEffect(() => {
     if (desireReload) {
-      getNfts()
+      getAssets()
       setDesireReload(false)
     }
   }, [desireReload])
@@ -43,7 +45,18 @@ export default function TabNftCollection() {
     setDialogOpened(true)
   }
 
-  const getNfts = async () => {
+  const getAlgoIndexerClient = async () => {
+    let indexerServer = '';
+    if (network === 'MainNet') {
+      indexerServer = INDEXER_SERVER_MAINNET;
+    } else {
+      indexerServer = INDEXER_SERVER_TESTNET;
+    }
+    const indexerClient = new algosdk.Indexer(ALGOD_TOKEN, indexerServer, ALGOD_PORT);
+    setAlgoIndexerClient(indexerClient);
+  }
+
+  const getAssets = async () => {
     try {
       openLoading()
       let algodServer = ''
@@ -53,36 +66,20 @@ export default function TabNftCollection() {
         algodServer = ALGOD_SERVER_TESTNET;
       }
       const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, algodServer, ALGOD_PORT);
-
       const accountInfo = await algodClient.accountInformation(currentUser).do();
       console.log('>>>>>>>> accountInfo => ', accountInfo)
-      setBalanceAct(accountInfo.amount)
 
-      const _nfts = accountInfo['created-assets'].filter(
-        (assetItem: any) => {
-          if (assetItem['params']['url']) {
-            if (assetItem['params']['url'].slice(0, 20) === BASE_URL_OF_IPFS) {
-              return true;
-            }
-            if (assetItem['params']['url'].slice(0, 7) === 'ipfs://') {
-              return true;
-            }
-          }
-          return false;
-        }
-      )
-      console.log('>>>>>>>>> nfts => ', _nfts)
-      setNfts(_nfts)
+      setBalanceAct(accountInfo.amount)
+      setAssets(accountInfo['assets'])
       closeLoading()
     } catch (error) {
-      console.log('>>>>>>> error of getNfts => ', error)
+      console.log('>>>>>>> error of getAssets => ', error)
       openAlert({
         severity: ERROR,
         message: MSG_ERROR_OCCURED
       })
       closeLoading()
     }
-
   }
 
   return (
@@ -104,21 +101,20 @@ export default function TabNftCollection() {
         >Mint NFT</Button>
       </Stack>
       <Box mt={5}>
-        {nfts.length > 0 ? (
+        {assets.length > 0 ? (
           <Grid container spacing={2}>
-            {nfts.map(nftItem => (
-              <Grid item xs={12} md={3} key={nftItem['index']}>
-                <CardNft
-                  nft={nftItem}
-                  key={nftItem['index']}
-                  setDialogSendNftOpened={setDialogSendNftOpened}
-                  setDialogOptOutOpened={setDialogOptOutOpened}
-                  setDialogMetadataOpened={setDialogMetadataOpened}
-                  setDialogBurnOpened={setDialogBurnOpened}
-                  setSelectedNft={setSelectedNft}
-                  setMetadataOfSelectedNft={setMetadataOfSelectedNft}
-                />
-              </Grid>
+            {assets.map(assetItem => (
+              <CardNft
+                key={assetItem['asset-id']}
+                assetInfo={assetItem}
+                algoIndexerClient={algoIndexerClient}
+                setDialogSendNftOpened={setDialogSendNftOpened}
+                setDialogOptOutOpened={setDialogOptOutOpened}
+                setDialogMetadataOpened={setDialogMetadataOpened}
+                setDialogBurnOpened={setDialogBurnOpened}
+                setSelectedNft={setSelectedNft}
+                setMetadataOfSelectedNft={setMetadataOfSelectedNft}
+              />
             ))}
           </Grid>
         ) : (
