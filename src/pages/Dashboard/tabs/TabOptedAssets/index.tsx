@@ -10,6 +10,8 @@ import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, ER
 import useAlertMessage from '../../../../hooks/useAlertMessage'
 import CardOptedInAsset from './CardOptedInAsset'
 import DialogBurnAsset from '../../../../components/DialogBurnAsset'
+import DialogSendAssets from '../../../../components/DialogSendAssets'
+import DialogOptOutAsset from './DialogOptOutAsset'
 
 export default function TabOptedAssets() {
   const { openLoading, closeLoading } = useLoading()
@@ -137,13 +139,29 @@ export default function TabOptedAssets() {
         setDialogOpened={setDialogOpened}
       />
       {selectedAsset && (
-        <DialogBurnAsset
-          dialogTitle="Burn asset"
-          dialogOpened={dialogBurnOpened}
-          setDialogOpened={setDialogBurnOpened}
-          asset={selectedAsset}
-          setDesireReload={setDesireReload}
-        />
+        <>
+          <DialogSendAssets
+            dialogTitle="Send Assets"
+            dialogOpened={dialogSendAssetsOpened}
+            setDialogOpened={setDialogSendAssetsOpened}
+            asset={selectedAsset}
+            setDesireReload={setDesireReload}
+          />
+          <DialogOptOutAsset
+            asset={selectedAsset}
+            dialogOpened={dialogOptOutOpened}
+            setDialogOpened={setDialogOptOutOpened}
+            setDesireReload={setDesireReload}
+          />
+          <DialogBurnAsset
+            dialogTitle="Burn asset"
+            dialogOpened={dialogBurnOpened}
+            setDialogOpened={setDialogBurnOpened}
+            asset={selectedAsset}
+            setDesireReload={setDesireReload}
+          />
+        </>
+
       )}
     </Box>
   )

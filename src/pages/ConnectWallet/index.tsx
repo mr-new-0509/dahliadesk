@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Button, FormControlLabel, Grid, Radio, RadioGroup, Stack, Typography } from '@mui/material';
 import { TNetwork } from '../../utils/types';
 import DialogConnectWallet from '../../components/DialogConnectWallet';
+import { blue } from '@mui/material/colors';
 
 export default function ConnectWallet() {
   const [network, setNetwork] = useState<TNetwork>('TestNet');
@@ -25,7 +26,7 @@ export default function ConnectWallet() {
         <Grid item xs={12} md={9}>
           <Box sx={{
             height: '100vh',
-            background: 'url(/assets/images/connect-bg.jpg) no-repeat 50%',
+            background: 'url(/assets/images/connect-bg.jpeg) no-repeat 50%',
             backgroundSize: 'cover'
           }}>
             <Typography component="h1" textAlign="center" color="white" px={4} fontSize={48} fontWeight={600} pt={24}>
@@ -34,7 +35,7 @@ export default function ConnectWallet() {
           </Box>
         </Grid>
 
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} md={3} bgcolor={blue[300]}>
           <Stack px={3} justifyContent="center" alignItems="center" spacing={16}>
             <Box component="img" src="/assets/images/logo.png" alt="logo" width={148} mt={14} />
             <Stack justifyContent="center" alignItems="center" spacing={4}>
