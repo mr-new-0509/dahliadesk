@@ -12,6 +12,7 @@ import useAlertMessage from '../../../../hooks/useAlertMessage'
 import DialogSendAssets from '../../../../components/DialogSendAssets'
 import DialogMetadata from './DialogMetadata'
 import DialogBurnAsset from '../../../../components/DialogBurnAsset'
+import DialogOptOutNft from './DialogOptOutNft'
 
 export default function TabNftCollection() {
   const { openLoading, closeLoading } = useLoading()
@@ -134,6 +135,12 @@ export default function TabNftCollection() {
             dialogOpened={dialogSendNftOpened}
             setDialogOpened={setDialogSendNftOpened}
             asset={selectedNft}
+            setDesireReload={setDesireReload}
+          />
+          <DialogOptOutNft
+            asset={selectedNft}
+            dialogOpened={dialogOptOutOpened}
+            setDialogOpened={setDialogOptOutOpened}
             setDesireReload={setDesireReload}
           />
           <DialogMetadata

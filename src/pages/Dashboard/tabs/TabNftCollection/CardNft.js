@@ -175,10 +175,10 @@ export default function CardNft({
                       <ListItemIcon><Icon icon="ic:outline-send" /></ListItemIcon>
                       <ListItemText>Send NFT</ListItemText>
                     </MenuItem>
-                    {/* <MenuItem onClick={() => openDialogOptOut(popupState)}>
+                    <MenuItem onClick={() => openDialogOptOut(popupState)}>
                       <ListItemIcon><Icon icon="mdi:minus-circle-outline" /></ListItemIcon>
                       <ListItemText>Opt-Out</ListItemText>
-                    </MenuItem> */}
+                    </MenuItem>
                     <MenuItem onClick={() => openDialogMetadata(popupState)}>
                       <ListItemIcon><Icon icon="ic:baseline-remove-red-eye" /></ListItemIcon>
                       <ListItemText>View metadata</ListItemText>
