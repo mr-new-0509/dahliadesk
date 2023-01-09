@@ -11,6 +11,7 @@ interface IInitialState {
   network?: TNetwork;
   balance: number;
   myAlgoWallet?: object;
+  peraWallet?: object;
 }
 
 interface IAction {
@@ -64,6 +65,12 @@ const handlers: IHandlers = {
       myAlgoWallet: action.payload
     };
   },
+  SET_PERA_WALLET: (state: object, action: IAction) => {
+    return {
+      ...state,
+      peraWallet: action.payload
+    };
+  },
 };
 
 const reducer = (state: object, action: IAction) =>
@@ -72,7 +79,13 @@ const reducer = (state: object, action: IAction) =>
 //  Context
 const ConnectWalletContext = createContext({
   ...initialState,
-  connectAct: (network: TNetwork, currentUser: string, walletName: TWalletName) => Promise.resolve(),
+  connectAct: (
+    network: TNetwork, 
+    currentUser: string, 
+    walletName: TWalletName, 
+    myAlgoWallet?: object,
+    peraWallet?: object
+  ) => Promise.resolve(),
   disconnectAct: () => Promise.resolve(),
   setBalanceAct: (balance: number) => Promise.resolve()
 });
@@ -85,7 +98,8 @@ function ConnectWalletProvider({ children }: IProps) {
     network: TNetwork,
     currentUser: string,
     walletName: TWalletName,
-    myAlgoWallet?: object
+    myAlgoWallet?: object,
+    peraWallet?: object
   ) => {
     let algodServer = ''
     if (network === 'MainNet') {
@@ -113,6 +127,12 @@ function ConnectWalletProvider({ children }: IProps) {
       dispatch({
         type: 'SET_MY_ALGO_WALLET',
         payload: myAlgoWallet
+      })
+    }
+    if (walletName === 'Pera') {
+      dispatch({
+        type: 'SET_PERA_WALLET',
+        payload: peraWallet
       })
     }
   };

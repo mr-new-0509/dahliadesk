@@ -27,7 +27,7 @@ const validSchemaOfProperties = yup.object().shape({
 });
 
 export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesireReload }) {
-  const { currentUser, network, myAlgoWallet, walletName } = useConnectWallet();
+  const { currentUser, network, myAlgoWallet, walletName, peraWallet } = useConnectWallet();
   const { openLoading, closeLoading } = useLoading();
   const { openAlert } = useAlertMessage();
 
@@ -113,6 +113,11 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesire
           const signedTxns = await AlgoSigner.signTxn([{ txn: txn_b64 }]);
           const binarySignedTxn = await AlgoSigner.encoding.base64ToMsgpack(signedTxns[0].blob);
           await algodClient.sendRawTransaction(binarySignedTxn).do();
+        } else {
+          /* ----------------- Need test -------------------- */
+          const singleTxnGroups = [{ txn, signers: [currentUser] }];
+          const signedTxn = await peraWallet.signTransaction([singleTxnGroups]);
+          await algodClient.sendRawTransaction(signedTxn.blob).do();
         }
 
         await algosdk.waitForConfirmation(algodClient, txId, 4);

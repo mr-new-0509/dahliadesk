@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Dialog, DialogContent, DialogTitle, IconButton, ListItemText, MenuItem, MenuList, Stack, Typography } from '@mui/material';
+import { Box, Dialog, DialogContent, DialogTitle, IconButton, Stack } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { blue } from '@mui/material/colors';
 import { WALLET_ALGO_SIGNER } from '../utils/constants';

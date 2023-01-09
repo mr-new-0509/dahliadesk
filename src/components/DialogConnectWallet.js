@@ -91,7 +91,7 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
           disconnectAct();
         });
         console.log('>>>>>>>> walletAccounts => ', walletAccounts);
-        connectAct(network, walletAccounts[0].address, WALLET_PERA);
+        connectAct(network, walletAccounts[0].address, WALLET_PERA, undefined, peraWallet);
         closeDialog();
       });
   };

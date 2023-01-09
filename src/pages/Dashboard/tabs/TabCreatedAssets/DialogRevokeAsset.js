@@ -17,7 +17,7 @@ const validSchema = yup.object().shape({
 });
 
 export default function DialogRevokeAsset({ dialogOpened, setDialogOpened, asset, setDesireReload }) {
-  const { currentUser, network, myAlgoWallet, walletName } = useConnectWallet();
+  const { currentUser, network, myAlgoWallet, walletName, peraWallet } = useConnectWallet();
   const { openLoading, closeLoading } = useLoading();
   const { openAlert } = useAlertMessage();
 
@@ -92,6 +92,11 @@ export default function DialogRevokeAsset({ dialogOpened, setDialogOpened, asset
           const binarySignedTxn = await AlgoSigner.encoding.base64ToMsgpack(signedTxns[0].blob);
           console.log('>>>>>>>> binarySignedTxn => ', binarySignedTxn);
           await algodClient.sendRawTransaction(binarySignedTxn).do();
+        } else {
+          /* ----------------- Need test -------------------- */
+          const singleTxnGroups = [{ txn, signers: [currentUser] }];
+          const signedTxn = await peraWallet.signTransaction([singleTxnGroups]);
+          await algodClient.sendRawTransaction(signedTxn.blob).do();
         }
 
         const confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4);

@@ -18,7 +18,7 @@ const validSchema = yup.object().shape({
 });
 
 export default function DialogCreateAsset({ dialogOpened, setDialogOpened, setDesireReload }) {
-  const { currentUser, network, myAlgoWallet, walletName } = useConnectWallet();
+  const { currentUser, network, myAlgoWallet, walletName, peraWallet } = useConnectWallet();
   const { openLoading, closeLoading } = useLoading();
   const { openAlert } = useAlertMessage();
 
@@ -108,28 +108,25 @@ export default function DialogCreateAsset({ dialogOpened, setDialogOpened, setDe
           params
         );
         const txId = txn.txID().toString();
-        console.log('>>>>>>>> txId => ', txId);
 
         if (walletName === 'MyAlgo') {
           const signedTxn = await myAlgoWallet.signTransaction(txn.toByte());
-          console.log('>>>>>>>>>> signedTxn => ', signedTxn);
-
           await algodClient.sendRawTransaction(signedTxn.blob).do();
         } else if (walletName === 'AlgoSigner') {
           const txn_b64 = await AlgoSigner.encoding.msgpackToBase64(txn.toByte());
-          console.log('>>>>>>>> txn_b64 => ', txn_b64);
           const signedTxns = await AlgoSigner.signTxn([{ txn: txn_b64 }]);
-          console.log('>>>>>>>> signedTxns => ', signedTxns);
           const binarySignedTxn = await AlgoSigner.encoding.base64ToMsgpack(signedTxns[0].blob);
-          console.log('>>>>>>>> binarySignedTxn => ', binarySignedTxn);
           await algodClient.sendRawTransaction(binarySignedTxn).do();
+        } else {
+          /* ----------------- Need test -------------------- */
+          const singleTxnGroups = [{ txn, signers: [currentUser] }];
+          const signedTxn = await peraWallet.signTransaction([singleTxnGroups]);
+          await algodClient.sendRawTransaction(signedTxn.blob).do();
         }
 
-        const confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4);
-        console.log('>>>>>>>> confirmedTxn => ', confirmedTxn);
+        await algosdk.waitForConfirmation(algodClient, txId, 4);
 
         const txnResponse = await algodClient.pendingTransactionInformation(txId).do();
-        console.log('>>>>>>>>> txnResponse => ', txnResponse);
         closeLoading();
         closeDialog();
         openAlert({
