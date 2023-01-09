@@ -1,54 +1,56 @@
-import React, { useEffect, useState } from 'react'
-import { Box, Stack, TextField, Icon as MuiIcon, FormControlLabel, Checkbox, Button, Grid } from '@mui/material'
-import { Icon } from '@iconify/react'
-import algosdk from 'algosdk'
-import DialogCreateAsset from './DialogCreateAsset'
-import NoData from '../../../../components/NoData'
-import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_TOKEN, ALGOD_SERVER_TESTNET, ERROR, MSG_ERROR_OCCURED } from '../../../../utils/constants'
-import useConnectWallet from '../../../../hooks/useConnectWallet'
-import CardAsset from './CardAsset'
-import useLoading from '../../../../hooks/useLoading'
-import DialogSendAssets from '../../../../components/DialogSendAssets'
-import DialogModifyAsset from './DialogModifyAsset'
-import DialogFreezeAsset from './DialogFreezeAsset'
-import DialogRevokeAsset from './DialogRevokeAsset'
-import DialogDeleteAsset from './DialogDeleteAsset'
-import DialogBurnAsset from '../../../../components/DialogBurnAsset'
-import useAlertMessage from '../../../../hooks/useAlertMessage'
+import React, { useEffect, useState } from 'react';
+import { Box, Stack, TextField, Icon as MuiIcon, FormControlLabel, Checkbox, Button, Grid } from '@mui/material';
+import { Icon } from '@iconify/react';
+import algosdk from 'algosdk';
+import DialogCreateAsset from './DialogCreateAsset';
+import NoData from '../../../../components/NoData';
+import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_TOKEN, ALGOD_SERVER_TESTNET, ERROR, MSG_ERROR_OCCURED } from '../../../../utils/constants';
+import useConnectWallet from '../../../../hooks/useConnectWallet';
+import CardAsset from './CardAsset';
+import useLoading from '../../../../hooks/useLoading';
+import DialogSendAssets from '../../../../components/DialogSendAssets';
+import DialogModifyAsset from './DialogModifyAsset';
+import DialogFreezeAsset from './DialogFreezeAsset';
+import DialogRevokeAsset from './DialogRevokeAsset';
+import DialogDeleteAsset from './DialogDeleteAsset';
+import DialogBurnAsset from '../../../../components/DialogBurnAsset';
+import useAlertMessage from '../../../../hooks/useAlertMessage';
 
 export default function TabCreatedAssets() {
-  const { network, currentUser, setBalanceAct } = useConnectWallet()
-  const { openLoading, closeLoading } = useLoading()
-  const { openAlert } = useAlertMessage()
+  const { network, currentUser, setBalanceAct } = useConnectWallet();
+  const { openLoading, closeLoading } = useLoading();
+  const { openAlert } = useAlertMessage();
 
-  const [hideZeroBalance, setHideZeroBalance] = useState<boolean>(false)
-  const [dialogOpened, setDialogOpened] = useState<boolean>(false)
-  const [createdAssets, setCreatedAssets] = useState<Array<any>>([])
-  const [selectedAsset, setSelectedAsset] = useState(null)
-  const [dialogSendAssetsOpened, setDialogSendAssetsOpened] = useState<boolean>(false)
-  const [dialogModifyAssetOpened, setDialogModifyAssetOpened] = useState<boolean>(false)
-  const [dialogFreezeOpened, setDialogFreezeOpened] = useState<boolean>(false)
-  const [dialogRevokeAssetsOpened, setDialogRevokeAssetsOpened] = useState<boolean>(false)
-  const [dialogDeleteAssetOpened, setDialogDeleteAssetOpened] = useState<boolean>(false)
-  const [dialogDeployOpened, setDialogDeployOpened] = useState<boolean>(false)
-  const [dialogBurnAssetOpened, setDialogBurnAssetOpened] = useState<boolean>(false)
-  const [desireReload, setDesireReload] = useState<boolean>(false)
+  const [hideZeroBalance, setHideZeroBalance] = useState(false);
+  const [dialogOpened, setDialogOpened] = useState(false);
+  const [assets, setAssets] = useState([]);
+  const [visibleAssets, setVisibleAssets] = useState([]);
+  const [selectedAsset, setSelectedAsset] = useState(null);
+  const [dialogSendAssetsOpened, setDialogSendAssetsOpened] = useState(false);
+  const [dialogModifyAssetOpened, setDialogModifyAssetOpened] = useState(false);
+  const [dialogFreezeOpened, setDialogFreezeOpened] = useState(false);
+  const [dialogRevokeAssetsOpened, setDialogRevokeAssetsOpened] = useState(false);
+  const [dialogDeleteAssetOpened, setDialogDeleteAssetOpened] = useState(false);
+  const [dialogDeployOpened, setDialogDeployOpened] = useState(false);
+  const [dialogBurnAssetOpened, setDialogBurnAssetOpened] = useState(false);
+  const [desireReload, setDesireReload] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   useEffect(() => {
-    getAssets()
-  }, [network])
+    getAllAssets();
+  }, [network]);
 
   useEffect(() => {
     if (desireReload) {
-      getAssets()
-      setDesireReload(false)
+      getAllAssets();
+      setDesireReload(false);
     }
-  }, [desireReload])
+  }, [desireReload]);
 
-  const getAssets = async () => {
+  const getAllAssets = async () => {
     try {
-      openLoading()
-      let algodServer = ''
+      openLoading();
+      let algodServer = '';
       if (network === 'MainNet') {
         algodServer = ALGOD_SERVER_MAINNET;
       } else {
@@ -57,27 +59,51 @@ export default function TabCreatedAssets() {
       const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, algodServer, ALGOD_PORT);
 
       const accountInfo = await algodClient.accountInformation(currentUser).do();
-      console.log('>>>>>>>> accountInfo => ', accountInfo)
-      setBalanceAct(accountInfo.amount)
-      setCreatedAssets(accountInfo['created-assets'])
-      closeLoading()
+      console.log('>>>>>>>> accountInfo => ', accountInfo);
+      setBalanceAct(accountInfo.amount);
+      setAssets(accountInfo['created-assets']);
+      setVisibleAssets(accountInfo['created-assets']);
+      closeLoading();
     } catch (error) {
-      console.log('>>>>>>> error of getAssets => ', error)
+      console.log('>>>>>>> error of getAllAssets => ', error);
       openAlert({
         severity: ERROR,
         message: MSG_ERROR_OCCURED
-      })
-      closeLoading()
+      });
+      closeLoading();
     }
-  }
+  };
+
+  const searchAssetsByName = (newKeyword) => {
+    setSearchKeyword(newKeyword);
+    if (newKeyword) {
+      const regExpOfKeyword = new RegExp(newKeyword);
+      const searchedAssets = assets.filter(assetItem => {
+        if (assetItem['params']['name'].match(regExpOfKeyword)) {
+          return true;
+        }
+        return false;
+      });
+      setVisibleAssets(searchedAssets);
+    } else {
+      setVisibleAssets(assets);
+    }
+  };
 
   const handleCheck = () => {
-    setHideZeroBalance(!hideZeroBalance)
-  }
+    setHideZeroBalance(!hideZeroBalance);
+    if (!hideZeroBalance) {
+      const searchedAssets = assets.filter(assetItem => assetItem['params']['total'] !== 0);
+      console.log('>>>>>>>> searchedAssets => ', searchedAssets);
+      setVisibleAssets(searchedAssets);
+    } else {
+      setVisibleAssets(assets);
+    }
+  };
 
   const openDialog = () => {
-    setDialogOpened(true)
-  }
+    setDialogOpened(true);
+  };
 
   return (
     <Box>
@@ -90,6 +116,8 @@ export default function TabCreatedAssets() {
             InputProps={{
               startAdornment: <MuiIcon component={Icon} icon="material-symbols:search-rounded" />
             }}
+            value={searchKeyword}
+            onChange={(e) => searchAssetsByName(e?.target?.value)}
           />
           <FormControlLabel
             control={<Checkbox checked={hideZeroBalance} onChange={() => handleCheck()} />}
@@ -105,10 +133,10 @@ export default function TabCreatedAssets() {
       </Stack>
       <Box mt={5}>
         {
-          createdAssets.length > 0 ? (
+          visibleAssets.length > 0 ? (
             <Grid container spacing={4}>
               {
-                createdAssets.map(assetItem => (
+                visibleAssets.map(assetItem => (
                   <Grid item xs={12} md={6} key={assetItem['index']}>
                     <CardAsset
                       assetItem={assetItem}
@@ -178,5 +206,5 @@ export default function TabCreatedAssets() {
         </>
       )}
     </Box>
-  )
+  );
 }
