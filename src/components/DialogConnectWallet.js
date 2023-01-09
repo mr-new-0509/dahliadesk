@@ -82,7 +82,8 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
       network: network === 'MainNet' ? 'mainnet' : 'testnet'
     });
 
-    peraWallet.connect()
+    peraWallet
+      .connect()
       .then(walletAccounts => {
         setAccounts(walletAccounts);
         // Setup the disconnect event listener
@@ -90,9 +91,26 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
           peraWallet.disconnect();
           disconnectAct();
         });
-        console.log('>>>>>>>> walletAccounts => ', walletAccounts);
         connectAct(network, walletAccounts[0], WALLET_PERA, undefined, peraWallet);
         closeDialog();
+      })
+      .catch(error => {
+        if (error.message === 'Session currently connected') {
+          peraWallet.reconnectSession().then((walletAccounts) => {
+            console.log('>>>>>>> walletAccounts => ', walletAccounts);
+            // Setup the disconnect event listener
+            peraWallet.connector?.on("disconnect", () => {
+              peraWallet.disconnect();
+              disconnectAct();
+            });
+
+            if (peraWallet.isConnected && walletAccounts.length) {
+              setAccounts(walletAccounts);
+              connectAct(network, walletAccounts[0], WALLET_PERA, undefined, peraWallet);
+              closeDialog();
+            }
+          });
+        }
       });
   };
 
