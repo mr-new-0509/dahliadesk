@@ -176,6 +176,7 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
         accounts={accounts}
         dialogOpened={dialogSelectAccountOpened}
         setDialogOpened={setDialogSelectAccountOpened}
+        network={network}
       />
     </>
   );

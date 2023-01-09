@@ -5,8 +5,8 @@ import { blue } from '@mui/material/colors';
 import { WALLET_ALGO_SIGNER } from '../utils/constants';
 import useConnectWallet from '../hooks/useConnectWallet';
 
-export default function DialogSelectWalletAccount({ accounts, dialogOpened, setDialogOpened }) {
-  const { connectAct, network } = useConnectWallet();
+export default function DialogSelectWalletAccount({ accounts, dialogOpened, setDialogOpened, network }) {
+  const { connectAct } = useConnectWallet();
 
   const closeDialog = () => {
     setDialogOpened(false);

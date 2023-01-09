@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { Icon } from "@iconify/react"
-import { Avatar, Box, Button, Divider, Drawer, Fab, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack, Typography } from "@mui/material"
+import { Box, Button, Divider, Drawer, Fab, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack, Typography } from "@mui/material"
 import { Outlet, useNavigate } from "react-router"
 import copy from 'copy-to-clipboard'
 import ScrollFab from "../components/ScrollFab"
