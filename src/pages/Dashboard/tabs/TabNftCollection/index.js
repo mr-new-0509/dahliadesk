@@ -84,11 +84,13 @@ export default function TabNftCollection() {
     const _assets = [];
     for (let i = 0; i < assetInfos.length; i += 1) {
       let searchedResult = await indexerClient.searchForAssets().index(assetInfos[i]['asset-id']).do();
-      if (searchedResult['assets'][0]['params']['url']) {
-        if (searchedResult['assets'][0]['params']['url'].slice(0, 20) === BASE_URL_OF_IPFS) {
-          _assets.push(searchedResult['assets'][0]);
-        } else if (searchedResult['assets'][0]['params']['url'].slice(0, 7) === 'ipfs://') {
-          _assets.push(searchedResult['assets'][0]);
+      if (assetInfos[i]['amount'] > 0) {
+        if (searchedResult['assets'][0]['params']['url']) {
+          if (searchedResult['assets'][0]['params']['url'].slice(0, 20) === BASE_URL_OF_IPFS) {
+            _assets.push(searchedResult['assets'][0]);
+          } else if (searchedResult['assets'][0]['params']['url'].slice(0, 7) === 'ipfs://') {
+            _assets.push(searchedResult['assets'][0]);
+          }
         }
       }
     }
