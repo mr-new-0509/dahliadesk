@@ -1,38 +1,42 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Stack, TextField, Icon as MuiIcon, Button, Grid } from '@mui/material';
+import { Box, Stack, TextField, Icon as MuiIcon, FormControlLabel, Checkbox, Button, Grid } from '@mui/material';
 import { Icon } from '@iconify/react';
 import algosdk from 'algosdk';
-import DialogMintNft from './DialogMintNft';
+import DialogOptInAsset from './DialogOptInAsset';
 import NoData from '../../../../components/NoData';
 import useLoading from '../../../../hooks/useLoading';
 import useConnectWallet from '../../../../hooks/useConnectWallet';
-import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, ERROR, INDEXER_SERVER_MAINNET, INDEXER_SERVER_TESTNET, MSG_ERROR_OCCURED, BASE_URL_OF_IPFS } from '../../../../utils/constants';
-import CardNft from './CardNft';
+import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, ERROR, INDEXER_SERVER_MAINNET, INDEXER_SERVER_TESTNET, MSG_ERROR_OCCURED } from '../../../../utils/constants';
 import useAlertMessage from '../../../../hooks/useAlertMessage';
-import DialogSendAssets from '../../../../components/DialogSendAssets';
-import DialogMetadata from './DialogMetadata';
+import CardOptedInAsset from './CardOptedInAsset';
 import DialogBurnAsset from '../../../../components/DialogBurnAsset';
-import DialogOptOutNft from './DialogOptOutNft';
+import DialogSendAssets from '../../../../components/DialogSendAssets';
+import DialogOptOutAsset from './DialogOptOutAsset';
 
-export default function TabNftCollection() {
+export default function TabOptedAssets() {
   const { openLoading, closeLoading } = useLoading();
   const { network, currentUser, setBalanceAct } = useConnectWallet();
   const { openAlert } = useAlertMessage();
 
+  const [hideZeroBalance, setHideZeroBalance] = useState(false);
   const [dialogOpened, setDialogOpened] = useState(false);
-  const [desireReload, setDesireReload] = useState(false);
-  const [dialogSendNftOpened, setDialogSendNftOpened] = useState(false);
-  const [dialogOptOutOpened, setDialogOptOutOpened] = useState(false);
-  const [dialogMetadataOpened, setDialogMetadataOpened] = useState(false);
-  const [dialogBurnOpened, setDialogBurnOpened] = useState(false);
-  const [selectedNft, setSelectedNft] = useState(null);
-  const [metadataOfSelectedNft, setMetadataOfSelectedNft] = useState(null);
   const [assets, setAssets] = useState([]);
   const [visibleAssets, setVisibleAssets] = useState([]);
+  const [desireReload, setDesireReload] = useState(false);
+  const [algoIndexerClient, setAlgoIndexerClient] = useState(null);
+  const [dialogSendAssetsOpened, setDialogSendAssetsOpened] = useState(false);
+  const [dialogOptOutOpened, setDialogOptOutOpened] = useState(false);
+  const [dialogBurnOpened, setDialogBurnOpened] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState(null);
   const [searchKeyword, setSearchKeyword] = useState('');
 
   useEffect(() => {
     getAllAssets();
+    getAlgoIndexerClient();
+  }, [network]);
+
+  useEffect(() => {
+
   }, [network]);
 
   useEffect(() => {
@@ -41,6 +45,17 @@ export default function TabNftCollection() {
       setDesireReload(false);
     }
   }, [desireReload]);
+
+  const getAlgoIndexerClient = async () => {
+    let indexerServer = '';
+    if (network === 'MainNet') {
+      indexerServer = INDEXER_SERVER_MAINNET;
+    } else {
+      indexerServer = INDEXER_SERVER_TESTNET;
+    }
+    const indexerClient = new algosdk.Indexer(ALGOD_TOKEN, indexerServer, ALGOD_PORT);
+    setAlgoIndexerClient(indexerClient);
+  };
 
   const openDialog = () => {
     setDialogOpened(true);
@@ -56,12 +71,13 @@ export default function TabNftCollection() {
         algodServer = ALGOD_SERVER_TESTNET;
       }
       const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, algodServer, ALGOD_PORT);
+
       const accountInfo = await algodClient.accountInformation(currentUser).do();
       const assetDetails = await getAssetDetailsFromInfos(accountInfo['assets']);
 
+      setBalanceAct(accountInfo.amount);
       setAssets(assetDetails);
       setVisibleAssets(assetDetails);
-      setBalanceAct(accountInfo.amount);
       closeLoading();
     } catch (error) {
       console.log('>>>>>>> error of getAllAssets => ', error);
@@ -82,15 +98,10 @@ export default function TabNftCollection() {
     }
     const indexerClient = new algosdk.Indexer(ALGOD_TOKEN, indexerServer, ALGOD_PORT);
     const _assets = [];
+
     for (let i = 0; i < assetInfos.length; i += 1) {
       let searchedResult = await indexerClient.searchForAssets().index(assetInfos[i]['asset-id']).do();
-      if (searchedResult['assets'][0]['params']['url']) {
-        if (searchedResult['assets'][0]['params']['url'].slice(0, 20) === BASE_URL_OF_IPFS) {
-          _assets.push(searchedResult['assets'][0]);
-        } else if (searchedResult['assets'][0]['params']['url'].slice(0, 7) === 'ipfs://') {
-          _assets.push(searchedResult['assets'][0]);
-        }
-      }
+      _assets.push(searchedResult.assets[0]);
     }
     return _assets;
   };
@@ -111,81 +122,91 @@ export default function TabNftCollection() {
     }
   };
 
+  const handleCheck = () => {
+    setHideZeroBalance(!hideZeroBalance);
+    if (!hideZeroBalance) {
+      const searchedAssets = assets.filter(assetItem => assetItem['params']['total'] !== 0);
+      console.log('>>>>>>>> searchedAssets => ', searchedAssets);
+      setVisibleAssets(searchedAssets);
+    } else {
+      setVisibleAssets(assets);
+    }
+  };
+
   return (
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <TextField
-          name="searchKeyword"
-          label="Search NFT"
-          placeholder="Name"
-          InputProps={{
-            startAdornment: <MuiIcon component={Icon} icon="material-symbols:search-rounded" />
-          }}
-          value={searchKeyword}
-          onChange={(e) => searchAssetsByName(e?.target?.value)}
-        />
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <TextField
+            name="searchKeyword"
+            label="Search asset"
+            placeholder="Name"
+            InputProps={{
+              startAdornment: <MuiIcon component={Icon} icon="material-symbols:search-rounded" />
+            }}
+            value={searchKeyword}
+            onChange={(e) => searchAssetsByName(e?.target?.value)}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={hideZeroBalance} onChange={() => handleCheck()} />}
+            label="Hide 0 balance"
+          />
+        </Stack>
 
         <Button
           variant="contained"
           startIcon={<Icon icon="material-symbols:add" />}
           onClick={() => openDialog()}
-        >Mint NFT</Button>
+        >Opt-in asset</Button>
       </Stack>
       <Box mt={5}>
         {visibleAssets.length > 0 ? (
-          <Grid container spacing={2}>
+          <Grid container spacing={3}>
             {visibleAssets.map(assetItem => (
-              <CardNft
-                key={assetItem['index']}
-                asset={assetItem}
-                setDialogSendNftOpened={setDialogSendNftOpened}
-                setDialogOptOutOpened={setDialogOptOutOpened}
-                setDialogMetadataOpened={setDialogMetadataOpened}
-                setDialogBurnOpened={setDialogBurnOpened}
-                setSelectedNft={setSelectedNft}
-                setMetadataOfSelectedNft={setMetadataOfSelectedNft}
-              />
+              <Grid item xs={12} md={4} key={assetItem['index']}>
+                <CardOptedInAsset
+                  setSelectedAsset={setSelectedAsset}
+                  setDialogSendAssetsOpened={setDialogSendAssetsOpened}
+                  setDialogOptOutOpened={setDialogOptOutOpened}
+                  setDialogBurnOpened={setDialogBurnOpened}
+                  asset={assetItem}
+                />
+              </Grid>
             ))}
           </Grid>
         ) : (
           <NoData text="This account doesn't have any created assets" />
         )}
-
       </Box>
-      <DialogMintNft
+      <DialogOptInAsset
+        algoIndexerClient={algoIndexerClient}
         dialogOpened={dialogOpened}
         setDialogOpened={setDialogOpened}
-        setDesireReload={setDesireReload}
       />
-      {selectedNft && (
+      {selectedAsset && (
         <>
           <DialogSendAssets
-            dialogTitle="Send NFT"
-            dialogOpened={dialogSendNftOpened}
-            setDialogOpened={setDialogSendNftOpened}
-            asset={selectedNft}
+            dialogTitle="Send Assets"
+            dialogOpened={dialogSendAssetsOpened}
+            setDialogOpened={setDialogSendAssetsOpened}
+            asset={selectedAsset}
             setDesireReload={setDesireReload}
           />
-          <DialogOptOutNft
-            asset={selectedNft}
+          <DialogOptOutAsset
+            asset={selectedAsset}
             dialogOpened={dialogOptOutOpened}
             setDialogOpened={setDialogOptOutOpened}
             setDesireReload={setDesireReload}
           />
-          <DialogMetadata
-            dialogOpened={dialogMetadataOpened}
-            setDialogOpened={setDialogMetadataOpened}
-            asset={selectedNft}
-            metadata={metadataOfSelectedNft}
-          />
           <DialogBurnAsset
-            dialogTitle="Burn NFT"
+            dialogTitle="Burn asset"
             dialogOpened={dialogBurnOpened}
             setDialogOpened={setDialogBurnOpened}
-            asset={selectedNft}
+            asset={selectedAsset}
             setDesireReload={setDesireReload}
           />
         </>
+
       )}
     </Box>
   );

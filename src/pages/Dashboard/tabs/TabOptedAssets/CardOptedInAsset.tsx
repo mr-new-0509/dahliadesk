@@ -1,20 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import { Card, CardContent, CardHeader, IconButton, Link, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import useConnectWallet from '../../../../hooks/useConnectWallet';
 import { BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_TESTNET_EXPLORER, BASE_URL_OF_MAINNET_SWAP, BASE_URL_OF_TESTNET_SWAP } from '../../../../utils/constants';
 import { Icon } from '@iconify/react';
 import PopupState, { bindMenu, bindTrigger } from 'material-ui-popup-state';
-import useLoading from '../../../../hooks/useLoading';
-
-interface IAssetInfo {
-  amount: number;
-  'asset-id': number;
-  'is-frozen': boolean;
-}
 
 interface IProps {
-  assetInfo: IAssetInfo;
-  algoIndexerClient: any;
+  asset: any;
   setSelectedAsset: Function;
   setDialogSendAssetsOpened: Function;
   setDialogOptOutOpened: Function;
@@ -22,27 +14,13 @@ interface IProps {
 }
 
 export default function CardOptedInAsset({
-  assetInfo,
-  algoIndexerClient,
+  asset,
   setSelectedAsset,
   setDialogSendAssetsOpened,
   setDialogOptOutOpened,
   setDialogBurnOpened
 }: IProps) {
   const { network, currentUser } = useConnectWallet()
-  const { openLoading, closeLoading } = useLoading()
-
-  const [asset, setAsset] = useState(null)
-
-  useEffect(() => {
-    console.log('>>>>>>> assetInfo => ', assetInfo);
-    (async () => {
-      openLoading()
-      const { assets } = await algoIndexerClient.searchForAssets().index(assetInfo['asset-id']).do()
-      setAsset(assets[0])
-      closeLoading()
-    })()
-  }, [assetInfo])
 
   const baseUrlOfExplorer = useMemo(() => {
     if (network === 'MainNet') {
