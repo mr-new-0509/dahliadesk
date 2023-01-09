@@ -63,7 +63,6 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
     let walletAccounts = await myAlgoWallet.connect();
     setAccounts(walletAccounts);
     if (walletAccounts.length > 0) {
-      console.log('>>>>>>>> myAlgoWallet => ', myAlgoWallet);
       connectAct(network, walletAccounts[0].address, WALLET_MY_ALGO, myAlgoWallet);
       getBalanceOfCurrentUser(walletAccounts[0].address, network);
       closeDialog();
@@ -80,7 +79,7 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
    */
   const connectByPera = () => {
     let peraWallet = new PeraWalletConnect({
-      network
+      network: network === 'MainNet' ? 'mainnet' : 'testnet'
     });
 
     peraWallet.connect()
