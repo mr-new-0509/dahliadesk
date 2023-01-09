@@ -121,7 +121,7 @@ export default function DialogCreateAsset({ dialogOpened, setDialogOpened, setDe
           /* ----------------- Need test -------------------- */
           const singleTxnGroups = [{ txn, signers: [currentUser] }];
           const signedTxn = await peraWallet.signTransaction([singleTxnGroups]);
-          await algodClient.sendRawTransaction(signedTxn.blob).do();
+          await algodClient.sendRawTransaction(signedTxn).do();
         }
 
         await algosdk.waitForConfirmation(algodClient, txId, 4);
@@ -135,7 +135,7 @@ export default function DialogCreateAsset({ dialogOpened, setDialogOpened, setDe
         });
         setDesireReload(true);
       } catch (error) {
-        console.log('>>>>>>>>> error of DialogCreateAsset => ', error.message);
+        console.log('>>>>>>>>> error of DialogCreateAsset => ', error);
         openAlert({
           severity: ERROR,
           message: error.message

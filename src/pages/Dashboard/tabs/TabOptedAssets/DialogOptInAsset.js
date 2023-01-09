@@ -91,7 +91,7 @@ export default function DialogOptInAsset({ dialogOpened, setDialogOpened, algoIn
         /* ----------------- Need test -------------------- */
         const singleTxnGroups = [{ txn, signers: [currentUser] }];
         const signedTxn = await peraWallet.signTransaction([singleTxnGroups]);
-        await algodClient.sendRawTransaction(signedTxn.blob).do();
+        await algodClient.sendRawTransaction(signedTxn).do();
       }
 
       await algosdk.waitForConfirmation(algodClient, txId, 4);
