@@ -39,7 +39,6 @@ export default function CardOptedInAsset({
     (async () => {
       openLoading()
       const { assets } = await algoIndexerClient.searchForAssets().index(assetInfo['asset-id']).do()
-      console.log('>>>>>>> assets => ', assets)
       setAsset(assets[0])
       closeLoading()
     })()

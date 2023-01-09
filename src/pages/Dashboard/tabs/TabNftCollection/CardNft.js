@@ -5,11 +5,9 @@ import { BASE_URL_OF_IPFS, BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_MAINNET_IND
 import { Icon } from '@iconify/react';
 import useConnectWallet from '../../../../hooks/useConnectWallet';
 import { Arc69 } from '../../../../utils/classes';
-import useLoading from '../../../../hooks/useLoading';
 
 export default function CardNft({
-  assetInfo,
-  algoIndexerClient,
+  asset,
   setDialogSendNftOpened,
   setDialogOptOutOpened,
   setDialogMetadataOpened,
@@ -18,28 +16,9 @@ export default function CardNft({
   setMetadataOfSelectedNft
 }) {
   const { network } = useConnectWallet();
-  const { openLoading, closeLoading } = useLoading();
 
   const [metadata, setMetadata] = useState(null);
   // const [standard, setStandard] = useState('');
-  const [asset, setAsset] = useState(null);
-
-  useEffect(() => {
-    console.log('>>>>>>> assetInfo => ', assetInfo);
-    (async () => {
-      openLoading();
-      const { assets } = await algoIndexerClient.searchForAssets().index(assetInfo['asset-id']).do();
-      console.log('>>>>>>> assets => ', assets);
-      if (assets[0]['params']['url']) {
-        if (assets[0]['params']['url'].slice(0, 20) === BASE_URL_OF_IPFS) {
-          setAsset(assets[0]);
-        } else if (assets[0]['params']['url'].slice(0, 7) === 'ipfs://') {
-          setAsset(assets[0]);
-        }
-      }
-      closeLoading();
-    })();
-  }, [assetInfo]);
 
   useEffect(() => {
     if (asset) {
