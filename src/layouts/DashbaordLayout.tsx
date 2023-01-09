@@ -58,7 +58,7 @@ export default function DashboardLayout() {
           {/* Wallet data */}
           <Stack alignItems="center" justifyContent="center" spacing={2} mt={4}>
             {/* avatar */}
-            <Avatar src="/assets/images/default-avatar.png" alt="" sx={{ width: 84, height: 84 }} />
+            {/* <Avatar src="/assets/images/default-avatar.png" alt="" sx={{ width: 84, height: 84 }} /> */}
 
             {/* wallet address */}
             <Box width="100%">
