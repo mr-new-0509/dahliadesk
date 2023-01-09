@@ -1,12 +1,13 @@
 /* global AlgoSigner */
 
 import React, { useMemo, useState } from 'react';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, IconButton, Radio, RadioGroup, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, Grid, IconButton, Radio, RadioGroup, Stack, Switch, TextField, Tooltip, Typography, Icon as MuiIcon } from '@mui/material';
 import { Icon } from '@iconify/react';
 import * as yup from 'yup';
 import { useFormik } from 'formik';
 import algosdk from 'algosdk';
-import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, BASE_URL_OF_IPFS, ERROR, MSG_REQUIRED, SUCCESS } from '../../../../utils/constants';
+import WAValidator from 'multicoin-address-validator';
+import { ALGOD_PORT, ALGOD_SERVER_MAINNET, ALGOD_SERVER_TESTNET, ALGOD_TOKEN, BASE_URL_OF_IPFS, ERROR, MSG_INVAILD_ADDRESS, MSG_REQUIRED, SUCCESS } from '../../../../utils/constants';
 import { showFirstLetters } from '../../../../utils/functions';
 import api from '../../../../utils/api';
 import useConnectWallet from '../../../../hooks/useConnectWallet';
@@ -33,6 +34,10 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesire
 
   const [nftStandard, setNftStandard] = useState('arc69');
   const [properties, setProperties] = useState({});
+  const [managerEnabled, setManagerEnabled] = useState(false);
+  const [reserveEnabled, setReserveEnabled] = useState(false);
+  const [freezeEnabled, setFreezeEnabled] = useState(false);
+  const [clawbackEnabled, setClawbackEnabled] = useState(false);
 
   const propertyKeys = useMemo(() => {
     return Object.keys(properties);
@@ -52,12 +57,41 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesire
       unitName: '',
       description: '',
       totalIssuance: 1,
-      file: undefined
+      file: undefined,
+      manager: currentUser,
+      reserve: currentUser,
+      freeze: currentUser,
+      clawback: currentUser
     },
     validationSchema: validSchema,
     onSubmit: async (values) => {
-      const { name, unitName, description, totalIssuance, file } = values;
+      const { name, unitName, description, totalIssuance, file, manager, reserve, freeze, clawback } = values;
       let assetName = name;
+
+      const isValidManager = WAValidator.validate(manager, 'algo');
+      const isValidReserve = WAValidator.validate(reserve, 'algo');
+      const isValidFreeze = WAValidator.validate(freeze, 'algo');
+      const isValidClawback = WAValidator.validate(clawback, 'algo');
+
+      if (!isValidManager) {
+        formik.setFieldError('manager', MSG_INVAILD_ADDRESS);
+        return;
+      }
+
+      if (!isValidReserve) {
+        formik.setFieldError('reserve', MSG_INVAILD_ADDRESS);
+        return;
+      }
+
+      if (!isValidFreeze) {
+        formik.setFieldError('freeze', MSG_INVAILD_ADDRESS);
+        return;
+      }
+
+      if (!isValidClawback) {
+        formik.setFieldError('clawback', MSG_INVAILD_ADDRESS);
+        return;
+      }
 
       try {
         openLoading();
@@ -95,10 +129,10 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesire
           assetURL: `${BASE_URL_OF_IPFS}/${resData.IpfsHash}`,
           assetMetadataHash: new Uint8Array([...resData.metadataHash]),
           defaultFrozen: false,
-          freeze: currentUser,
-          manager: currentUser,
-          clawback: currentUser,
-          reserve: currentUser,
+          freeze: freeze || undefined,
+          manager: manager || undefined,
+          clawback: clawback || undefined,
+          reserve: reserve || undefined,
           suggestedParams: params
         });
         const txId = txn.txID().toString();
@@ -171,6 +205,26 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesire
   const handleSelectFile = (e) => {
     console.log('>>>>>>>> e.target.files => ', e.target.files);
     formik.setFieldValue('file', e.target.files[0]);
+  };
+
+  const switchManager = (enabled) => {
+    setManagerEnabled(enabled);
+    formik.setFieldValue('manager', currentUser);
+  };
+
+  const switchReserve = (enabled) => {
+    setReserveEnabled(enabled);
+    formik.setFieldValue('reserve', currentUser);
+  };
+
+  const switchFreeze = (enabled) => {
+    setFreezeEnabled(enabled);
+    formik.setFieldValue('freeze', currentUser);
+  };
+
+  const switchClawback = (enabled) => {
+    setClawbackEnabled(enabled);
+    formik.setFieldValue('clawback', currentUser);
   };
 
   return (
@@ -269,6 +323,130 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesire
               fullWidth
             />
           </FormControl>
+
+          <Box>
+            <Grid container spacing={2}>
+              {/* Manager */}
+              <Grid item xs={12} md={6}>
+                <FormControlLabel
+                  control={<Switch checked={managerEnabled} onChange={() => switchManager(!managerEnabled)} />}
+                  label={
+                    <Tooltip
+                      title="The address of the account that can manage the configuration of the asset and destroy it"
+                      placement="bottom-start"
+                      sx={{ pt: 1 }}
+                      arrow
+                    >
+                      <MuiIcon component={Icon} icon="material-symbols:info-outline-rounded" />
+                    </Tooltip>
+                  }
+                  labelPlacement="start"
+                />
+                <TextField
+                  label="Manager"
+                  name="manager"
+                  multiline
+                  minRows={2}
+                  disabled={!managerEnabled}
+                  value={formik.values.manager}
+                  onChange={formik.handleChange}
+                  error={formik.touched.manager && Boolean(formik.errors.manager)}
+                  helperText={formik.touched.manager && formik.errors.manager}
+                  fullWidth
+                />
+              </Grid>
+
+              {/* Reserve */}
+              <Grid item xs={12} md={6}>
+                <FormControlLabel
+                  control={<Switch checked={reserveEnabled} onChange={() => switchReserve(!reserveEnabled)} />}
+                  label={
+                    <Tooltip
+                      title="The address of the account that holds the reserve (non-minted) units of the asset. This address has no specific authority in the protocol itself. It is used in the case where you want to signal to holders of your asset that the non-minted units of the asset reside in an account that is different from the default creator account (the sender)"
+                      placement="bottom-start"
+                      sx={{ pt: 1 }}
+                      arrow
+                    >
+                      <MuiIcon component={Icon} icon="material-symbols:info-outline-rounded" />
+                    </Tooltip>
+                  }
+                  labelPlacement="start"
+                />
+                <TextField
+                  label="Reserve"
+                  name="reserve"
+                  multiline
+                  minRows={2}
+                  disabled={!reserveEnabled}
+                  value={formik.values.reserve}
+                  onChange={formik.handleChange}
+                  error={formik.touched.reserve && Boolean(formik.errors.reserve)}
+                  helperText={formik.touched.reserve && formik.errors.reserve}
+                  fullWidth
+                />
+              </Grid>
+
+              {/* Freeze */}
+              <Grid item xs={12} md={6}>
+                <FormControlLabel
+                  control={<Switch checked={freezeEnabled} onChange={() => switchFreeze(!freezeEnabled)} />}
+                  label={
+                    <Tooltip
+                      title="The address of the account used to freeze holdings of this asset. If empty, freezing is not permitted"
+                      placement="bottom-start"
+                      sx={{ pt: 1 }}
+                      arrow
+                    >
+                      <MuiIcon component={Icon} icon="material-symbols:info-outline-rounded" />
+                    </Tooltip>
+                  }
+                  labelPlacement="start"
+                />
+                <TextField
+                  label="Freeze"
+                  name="freeze"
+                  multiline
+                  minRows={2}
+                  disabled={!freezeEnabled}
+                  value={formik.values.freeze}
+                  onChange={formik.handleChange}
+                  error={formik.touched.freeze && Boolean(formik.errors.freeze)}
+                  helperText={formik.touched.freeze && formik.errors.freeze}
+                  fullWidth
+                />
+              </Grid>
+
+              {/* Clawback */}
+              <Grid item xs={12} md={6}>
+                <FormControlLabel
+                  control={<Switch checked={clawbackEnabled} onChange={() => switchClawback(!clawbackEnabled)} />}
+                  label={
+                    <Tooltip
+                      title="The address of the account that can clawback holdings of this asset. If empty, clawback is not permitted."
+                      placement="bottom-start"
+                      sx={{ pt: 1 }}
+                      arrow
+                    >
+                      <MuiIcon component={Icon} icon="material-symbols:info-outline-rounded" />
+                    </Tooltip>
+                  }
+                  labelPlacement="start"
+                />
+                <TextField
+                  label="Clawback"
+                  name="clawback"
+                  multiline
+                  minRows={2}
+                  disabled={!clawbackEnabled}
+                  value={formik.values.clawback}
+                  onChange={formik.handleChange}
+                  error={formik.touched.clawback && Boolean(formik.errors.clawback)}
+                  helperText={formik.touched.clawback && formik.errors.clawback}
+                  fullWidth
+                />
+              </Grid>
+            </Grid>
+          </Box>
 
           <FormControl>
             <FormLabel htmlFor="properties">Properties</FormLabel>
