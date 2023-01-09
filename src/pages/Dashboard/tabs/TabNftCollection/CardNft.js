@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Card, CardActions, CardContent, CardMedia, Grid, IconButton, Link, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from '@mui/material';
+import { Box, Card, CardActions, CardContent, CardMedia, Grid, IconButton, Link, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from '@mui/material';
 import PopupState, { bindMenu, bindTrigger } from 'material-ui-popup-state';
 import { BASE_URL_OF_IPFS, BASE_URL_OF_MAINNET_EXPLORER, BASE_URL_OF_MAINNET_INDEX_EXPLORER, BASE_URL_OF_TESTNET_INDEX_EXPLORER, BASE_URL_OF_TESTNET_EXPLORER, DEFAULT_NFT_IMAGE, UNEXPECTED_TOKEN } from '../../../../utils/constants';
 import { Icon } from '@iconify/react';
@@ -120,11 +120,19 @@ export default function CardNft({
     return (
       <Grid item xs={12} md={3}>
         <Card>
-          <CardMedia
-            component="img"
-            src={imageUrlToVisible || DEFAULT_NFT_IMAGE}
-            sx={{ height: 300, objectFit: 'cover' }}
-          />
+          {imageUrlToVisible ? (
+            <CardMedia
+              component="img"
+              src={imageUrlToVisible}
+              sx={{ height: 300, objectFit: 'cover' }}
+            />
+          ) : (
+            <CardMedia
+              component={Box}
+              height={300}
+            />
+          )}
+
           <CardContent>
             <Typography component="h6" fontWeight={700}>ID: {asset['index']}</Typography>
             <Typography>Name: {asset['params']['name']}</Typography>
