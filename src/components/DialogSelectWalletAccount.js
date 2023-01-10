@@ -2,10 +2,10 @@ import React from 'react';
 import { Box, Dialog, DialogContent, DialogTitle, IconButton, Stack } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { blue } from '@mui/material/colors';
-import { WALLET_ALGO_SIGNER } from '../utils/constants';
+import { WALLET_ALGO_SIGNER, WALLET_MY_ALGO, WALLET_PERA } from '../utils/constants';
 import useConnectWallet from '../hooks/useConnectWallet';
 
-export default function DialogSelectWalletAccount({ accounts, dialogOpened, setDialogOpened, network }) {
+export default function DialogSelectWalletAccount({ accounts, dialogOpened, setDialogOpened, network, walletName, myAlgoWallet, peraWallet }) {
   const { connectAct } = useConnectWallet();
 
   const closeDialog = () => {
@@ -13,7 +13,13 @@ export default function DialogSelectWalletAccount({ accounts, dialogOpened, setD
   };
 
   const selectAccount = (account) => {
-    connectAct(network, account.address, WALLET_ALGO_SIGNER);
+    if (walletName === WALLET_ALGO_SIGNER) {
+      connectAct(network, account.address, WALLET_ALGO_SIGNER);
+    } else if (walletName === WALLET_MY_ALGO && myAlgoWallet) {
+      connectAct(network, account.address, WALLET_MY_ALGO, myAlgoWallet);
+    } else if (walletName === WALLET_PERA && peraWallet) {
+      connectAct(network, account, WALLET_PERA, undefined, peraWallet);
+    }
   };
 
   return (
@@ -29,9 +35,9 @@ export default function DialogSelectWalletAccount({ accounts, dialogOpened, setD
 
       <DialogContent>
         <Stack spacing={2}>
-          {accounts.map(accountItem => (
+          {accounts.map((accountItem, index) => (
             <Box
-              key={accountItem.address}
+              key={index}
               sx={{ overflowWrap: 'anywhere', bgcolor: blue[100], p: 2, cursor: 'pointer' }}
               onClick={() => selectAccount(accountItem)}
             >

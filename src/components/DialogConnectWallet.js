@@ -9,10 +9,8 @@ import { PeraWalletConnect } from "@perawallet/connect";
 import useAlertMessage from '../hooks/useAlertMessage';
 import { MSG_NO_ACCOUNT, MSG_NO_ALGO_SIGNER, WALLET_ALGO_SIGNER, WALLET_MY_ALGO, WALLET_PERA, WARNING } from '../utils/constants';
 import useConnectWallet from '../hooks/useConnectWallet';
-import { getBalanceOfCurrentUser } from '../utils/functions';
 import DialogSelectWalletAccount from './DialogSelectWalletAccount';
 
-const myAlgoWallet = new MyAlgoConnect();
 
 export default function DialogConnectWallet({ dialogOpened, setDialogOpened, network }) {
   const { openAlert } = useAlertMessage();
@@ -20,6 +18,9 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
 
   const [accounts, setAccounts] = useState([]);
   const [dialogSelectAccountOpened, setDialogSelectAccountOpened] = useState(false);
+  const [walletName, setWalletName] = useState('');
+  const [myAlgoWallet, setMyAlgoWallet] = useState(null);
+  const [peraWallet, setPeraWallet] = useState(null);
 
   const closeDialog = () => {
     setDialogOpened(false);
@@ -35,6 +36,7 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
         ledger: network
       });
       setAccounts(walletAccounts);
+      setWalletName(WALLET_ALGO_SIGNER);
       if (walletAccounts.length > 0) {
         if (walletAccounts.length > 1) {
           setDialogSelectAccountOpened(true);
@@ -60,11 +62,20 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
    * Connect wallet by MyAlgo wallet
    */
   const connectByMyAlgo = async () => {
-    let walletAccounts = await myAlgoWallet.connect();
-    setAccounts(walletAccounts);
+    const newAlgoWallet = new MyAlgoConnect();
+    let walletAccounts = await newAlgoWallet.connect();
+    console.log('>>>>>>> walletAccounts of myAlgoWallet => ', walletAccounts);
+
     if (walletAccounts.length > 0) {
-      connectAct(network, walletAccounts[0].address, WALLET_MY_ALGO, myAlgoWallet);
-      getBalanceOfCurrentUser(walletAccounts[0].address, network);
+      setAccounts(walletAccounts);
+      setWalletName(WALLET_MY_ALGO);
+      setMyAlgoWallet(newAlgoWallet);
+
+      if (walletAccounts.length > 1) {
+        setDialogSelectAccountOpened(true);
+      } else {
+        connectAct(network, walletAccounts[0].address, WALLET_MY_ALGO, newAlgoWallet);
+      }
       closeDialog();
     } else {
       openAlert({
@@ -86,6 +97,8 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
       .connect()
       .then(walletAccounts => {
         setAccounts(walletAccounts);
+        setWalletName(WALLET_PERA);
+        setPeraWallet(peraWallet);
         // Setup the disconnect event listener
         peraWallet.connector?.on("disconnect", () => {
           peraWallet.disconnect();
@@ -96,19 +109,21 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
       })
       .catch(error => {
         if (error.message === 'Session currently connected') {
-          peraWallet.reconnectSession().then((walletAccounts) => {
-            console.log('>>>>>>> walletAccounts => ', walletAccounts);
-            // Setup the disconnect event listener
-            peraWallet.connector?.on("disconnect", () => {
-              peraWallet.disconnect();
-              disconnectAct();
-            });
-
-            if (peraWallet.isConnected && walletAccounts.length) {
-              setAccounts(walletAccounts);
-              connectAct(network, walletAccounts[0], WALLET_PERA, undefined, peraWallet);
-              closeDialog();
-            }
+          peraWallet.reconnectSession().then(() => {
+            peraWallet
+              .connect()
+              .then(walletAccounts => {
+                setAccounts(walletAccounts);
+                setWalletName(WALLET_PERA);
+                setPeraWallet(peraWallet);
+                // Setup the disconnect event listener
+                peraWallet.connector?.on("disconnect", () => {
+                  peraWallet.disconnect();
+                  disconnectAct();
+                });
+                connectAct(network, walletAccounts[0], WALLET_PERA, undefined, peraWallet);
+                closeDialog();
+              });
           });
         }
       });
@@ -195,6 +210,9 @@ export default function DialogConnectWallet({ dialogOpened, setDialogOpened, net
         dialogOpened={dialogSelectAccountOpened}
         setDialogOpened={setDialogSelectAccountOpened}
         network={network}
+        walletName={walletName}
+        myAlgoWallet={myAlgoWallet}
+        peraWallet={peraWallet}
       />
     </>
   );
