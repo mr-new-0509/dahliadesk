@@ -28,9 +28,9 @@ export default function ConnectWallet() {
             background: 'url(/assets/images/connect-bg.jpeg) no-repeat 50%',
             backgroundSize: 'cover'
           }}>
-            <Typography component="h1" textAlign="center" color="white" px={4} fontSize={48} fontWeight={600} pt={24}>
+            {/* <Typography component="h1" textAlign="center" color="white" px={4} fontSize={48} fontWeight={600} pt={24}>
               Create & Manage your Assets
-            </Typography>
+            </Typography> */}
           </Box>
         </Grid>
 
