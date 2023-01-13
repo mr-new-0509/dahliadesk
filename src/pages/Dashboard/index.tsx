@@ -5,6 +5,7 @@ import { TabContext, TabList, TabPanel } from '@mui/lab'
 import TabCreatedAssets from './tabs/TabCreatedAssets'
 import TabOptedAssets from './tabs/TabOptedAssets'
 import TabNftCollection from './tabs/TabNftCollection'
+import TabDistributeToken from './tabs/TabDistributeToken'
 
 export default function Dashboard() {
   const [currentTab, setCurrentTab] = useState<string>("0")
@@ -23,12 +24,14 @@ export default function Dashboard() {
               <Tab label="Created assets" value="0" />
               <Tab label="Opted assets" value="1" />
               <Tab label="NFT collection" value="2" />
+              <Tab label="Distribute Token" value="3" />
             </TabList>
           </Box>
           <Box mt={3}>
             <TabPanel value="0"><TabCreatedAssets /></TabPanel>
             <TabPanel value="1"><TabOptedAssets /></TabPanel>
             <TabPanel value="2"><TabNftCollection /></TabPanel>
+            <TabPanel value="3"><TabDistributeToken /></TabPanel>
           </Box>
         </TabContext>
       </Box>
