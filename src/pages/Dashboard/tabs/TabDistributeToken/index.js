@@ -81,11 +81,6 @@ export default function TabDistributeToken() {
 
     for (let i = 0; i < _excelData.length; i += 1) {
       let { columnValues } = _excelData[i];
-      let arrOfTxIdAndColumnValueIndex = [];
-      let txGroupsForPeraWallet = [];
-      let txGroupsForMyAlgo = [];
-      let txGroupsForAlgoSigner = [];
-
       for (let j = 0; j < columnValues.length; j += 1) {
         //  Validate the address in excel file
         let isValidWalletAddress = WAValidator.validate(columnValues[j][EXCEL_FIELD_NAME_OF_WALLET_ADDRESS], 'algo');
@@ -98,8 +93,6 @@ export default function TabDistributeToken() {
             let asset = searchedResult.assets[0];
 
             if (asset) {
-              let objectOfTxIdAndColumnValueIndex = {};
-
               if (columnValues[j][EXCEL_FIELD_NAME_OF_NOTE]) {
                 encodedNote = enc.encode(columnValues[j][EXCEL_FIELD_NAME_OF_NOTE]);
               }
@@ -141,13 +134,24 @@ export default function TabDistributeToken() {
               }
 
               let txId = txn.txID().toString();
-              objectOfTxIdAndColumnValueIndex.txId = txId;
-              objectOfTxIdAndColumnValueIndex.columnValueIndex = j;
 
-              let txn_b64 = await AlgoSigner.encoding.msgpackToBase64(txn.toByte());
-              txGroupsForAlgoSigner.push({ txn: txn_b64 });
-              txGroupsForMyAlgo.push({ txn: txn.toByte(), signers: [currentUser] });
-              txGroupsForPeraWallet.push({ txn, signers: [currentUser] });
+              if (walletName === WALLET_MY_ALGO) {
+                let signedTxn = await myAlgoWallet.signTransaction(txn.toByte());
+                await algodClient.sendRawTransaction(signedTxn.blob).do();
+              } else if (walletName === WALLET_ALGO_SIGNER) {
+                let txn_b64 = await AlgoSigner.encoding.msgpackToBase64(txn.toByte());
+                let signedTxns = await AlgoSigner.signTxn([{ txn: txn_b64 }]);
+                let binarySignedTxn = await AlgoSigner.encoding.base64ToMsgpack(signedTxns[0].blob);
+                await algodClient.sendRawTransaction(binarySignedTxn).do();
+              } else {
+                let singleTxnGroups = [{ txn, signers: [currentUser] }];
+                let signedTxn = await peraWallet.signTransaction([singleTxnGroups]);
+                await algodClient.sendRawTransaction(signedTxn).do();
+              }
+              await algosdk.waitForConfirmation(algodClient, txId, 4);
+              await algodClient.pendingTransactionInformation(txId).do();
+              columnValues[j][EXCEL_FIELD_NAME_OF_RESULT] = MSG_SUCCESS;
+              continue;
             } else {
               columnValues[j][EXCEL_FIELD_NAME_OF_RESULT] = MSG_FAILED;
               continue;
@@ -161,30 +165,6 @@ export default function TabDistributeToken() {
           columnValues[j][EXCEL_FIELD_NAME_OF_RESULT] = MSG_FAILED;
           continue;
         }
-      }
-
-      try {
-        if (walletName === WALLET_MY_ALGO) {
-          //  MyAlgo Wallet
-          let signedTxn = await myAlgoWallet.signTxns(txGroupsForMyAlgo);
-          await algodClient.sendRawTransaction(signedTxn.blob).do();
-        } else if (walletName === WALLET_ALGO_SIGNER) {
-          //  AlgoSigner
-          let signedTxns = await AlgoSigner.signTxn(txGroupsForAlgoSigner);
-          let binarySignedTxn = await AlgoSigner.encoding.base64ToMsgpack(signedTxns[0].blob);
-          await algodClient.sendRawTransaction(binarySignedTxn).do();
-        } else {
-          console.log('>>> txGroupsForPeraWallet => ', txGroupsForPeraWallet);
-          //  PeraWallet
-          let signedTxn = await peraWallet.signTransaction([txGroupsForPeraWallet]);
-          await algodClient.sendRawTransaction(signedTxn).do();
-        }
-        // await algosdk.waitForConfirmation(algodClient, txId, 4);
-        // await algodClient.pendingTransactionInformation(txId).do();
-        // columnValues[j][EXCEL_FIELD_NAME_OF_RESULT] = MSG_SUCCESS;
-        // continue;
-      } catch (error) {
-        console.log(error);
       }
     }
     closeLoading();
