@@ -6,6 +6,9 @@ export const INFO = "info";
 export const WARNING = "warning";
 export const ERROR = "error";
 export const UNEXPECTED_TOKEN = "Unexpected token";
+export const REVOKE = "revoke";
+export const FREEZE = "freeze";
+export const SEND = "send";
 
 export const MSG_NO_ALGO_SIGNER =
   "No AlgoSigner in your browser. Please install it, then try again.";
@@ -15,6 +18,8 @@ export const MSG_REQUIRED = "Required.";
 export const MSG_INVAILD_ADDRESS = "Invalid address.";
 export const MSG_UNSUPPORTED_FILE_FORMAT = "Unsupported file format.";
 export const MSG_ERROR_OCCURED = "Something was wrong.";
+export const MSG_FAILED = "Failed.";
+export const MSG_SUCCESS = "Success";
 
 export const WALLET_ALGO_SIGNER = "AlgoSigner";
 export const WALLET_MY_ALGO = "MyAlgo";
@@ -44,3 +49,9 @@ export const BASE_URL_OF_MAINNET_INDEX_EXPLORER =
 export const BURNER_VAULT_ADDRESS =
   "7RFLMPOWFSZVTSCDTRPXXFSL224LBXJBMCWKIGOIXP6CRWDBWZ33TMB3OQ";
 export const DEFAULT_NFT_IMAGE = "/assets/images/nft-no-image.png";
+
+export const EXCEL_FIELD_NAME_OF_WALLET_ADDRESS = "Wallet receiver";
+export const EXCEL_FIELD_NAME_OF_ASSET_ID = "ID ASA";
+export const EXCEL_FIELD_NAME_OF_QUANTITY = "Quantity";
+export const EXCEL_FIELD_NAME_OF_NOTE = "Note Transiction";
+export const EXCEL_FIELD_NAME_OF_RESULT = "Result";

@@ -90,16 +90,11 @@ export default function DialogFreezeAsset({ dialogOpened, setDialogOpened, asset
 
         if (walletName === 'MyAlgo') {
           const signedTxn = await myAlgoWallet.signTransaction(txn.toByte());
-          console.log('>>>>>>>>>> signedTxn => ', signedTxn);
-
           await algodClient.sendRawTransaction(signedTxn.blob).do();
         } else if (walletName === 'AlgoSigner') {
           const txn_b64 = await AlgoSigner.encoding.msgpackToBase64(txn.toByte());
-          console.log('>>>>>>>> txn_b64 => ', txn_b64);
           const signedTxns = await AlgoSigner.signTxn([{ txn: txn_b64 }]);
-          console.log('>>>>>>>> signedTxns => ', signedTxns);
           const binarySignedTxn = await AlgoSigner.encoding.base64ToMsgpack(signedTxns[0].blob);
-          console.log('>>>>>>>> binarySignedTxn => ', binarySignedTxn);
           await algodClient.sendRawTransaction(binarySignedTxn).do();
         } else {
           /* ----------------- Need test -------------------- */

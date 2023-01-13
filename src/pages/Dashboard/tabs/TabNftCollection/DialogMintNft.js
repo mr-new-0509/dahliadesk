@@ -68,29 +68,36 @@ export default function DialogMintNft({ dialogOpened, setDialogOpened, setDesire
       const { name, unitName, description, totalIssuance, file, manager, reserve, freeze, clawback } = values;
       let assetName = name;
 
-      const isValidManager = WAValidator.validate(manager, 'algo');
-      const isValidReserve = WAValidator.validate(reserve, 'algo');
-      const isValidFreeze = WAValidator.validate(freeze, 'algo');
-      const isValidClawback = WAValidator.validate(clawback, 'algo');
-
-      if (!isValidManager) {
-        formik.setFieldError('manager', MSG_INVAILD_ADDRESS);
-        return;
+      if (manager) {
+        const isValidManager = WAValidator.validate(manager, 'algo');
+        if (!isValidManager) {
+          formik.setFieldError('manager', MSG_INVAILD_ADDRESS);
+          return;
+        }
       }
 
-      if (!isValidReserve) {
-        formik.setFieldError('reserve', MSG_INVAILD_ADDRESS);
-        return;
+      if (reserve) {
+        const isValidReserve = WAValidator.validate(reserve, 'algo');
+        if (!isValidReserve) {
+          formik.setFieldError('reserve', MSG_INVAILD_ADDRESS);
+          return;
+        }
       }
 
-      if (!isValidFreeze) {
-        formik.setFieldError('freeze', MSG_INVAILD_ADDRESS);
-        return;
+      if (freeze) {
+        const isValidFreeze = WAValidator.validate(freeze, 'algo');
+        if (!isValidFreeze) {
+          formik.setFieldError('freeze', MSG_INVAILD_ADDRESS);
+          return;
+        }
       }
 
-      if (!isValidClawback) {
-        formik.setFieldError('clawback', MSG_INVAILD_ADDRESS);
-        return;
+      if (clawback) {
+        const isValidClawback = WAValidator.validate(clawback, 'algo');
+        if (!isValidClawback) {
+          formik.setFieldError('clawback', MSG_INVAILD_ADDRESS);
+          return;
+        }
       }
 
       try {
