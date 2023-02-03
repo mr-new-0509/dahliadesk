@@ -9,7 +9,7 @@
 - **Skype:** [@sin085](https://join.skype.com/invite/xat3AgpiRVOI)
 
 ## Release date
-July 12, 2022
+Jan 16, 2022
 
 ## Environment
 - `Node.js v18.12.1`
