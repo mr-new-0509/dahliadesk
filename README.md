@@ -1,4 +1,7 @@
-# Fresh React + MUI Skeleton (TypeScript)
+# Dahliadesk
+
+## Live site
+[![Live site](readme_images/guide-site.png)](https://dahliadesk.io/)
 
 ## Contact info
 - **Email:** mr.new0509@gmail.com
@@ -9,11 +12,12 @@
 July 12, 2022
 
 ## Environment
-- `Node.js v14.17.0`
+- `Node.js v18.12.1`
 
 ## Stack
 - **Framework:** `React.js v18.2.0`
 - **Theme:** `MUI v5.8.7`
+- **Blockchain:** `Algorand`
 
 ## How to run the game.
 1. Please open terminal window in the root directory.
